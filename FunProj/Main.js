@@ -18,6 +18,10 @@ var main = (function() {
         //Loading canvas from the HTML Element
         browserCanvas = document.getElementById("gl-canvas");
 
+        browserCanvas.width = 300;
+        browserCanvas.height = 400;
+
+
         glContext = WebGLUtils.setupWebGL(browserCanvas);
         if (!glContext) {
             alert("WebGl isn't available");
@@ -65,8 +69,46 @@ var main = (function() {
         theta[2] += 0.1;
         glContext.uniform3fv(thetaLoc, theta);
 
+        resize(glContext);
+
         requestAnimFrame(render);
 
+    }
+
+    function resize(gl) {
+        // Get the canvas from the WebGL context
+        var canvas = gl.canvas;
+        //console.log("resize");
+        // Lookup the size the browser is displaying the canvas.
+        var displayWidth  = canvas.clientWidth;
+        var displayHeight = canvas.clientHeight;
+
+        console.log("displayWidth: " + displayWidth + "\n" + "clientWidth: "  + canvas.clientWidth );
+        console.log("displayHeight: " + displayHeight + "\n" + "clientHeight: "  + canvas.clientHeight );
+        console.log("---------------------------------------------------------------------");
+
+        // Check if the canvas is not the same size.
+        if (canvas.width  != displayWidth ||
+            canvas.height != displayHeight) {
+            console.log("hei if setning");
+            var w = canvas.width;
+            var h = canvas.height;
+            var ratio = w/h;
+
+            var newHeight = displayWidth / ratio;
+            var newWidth = displayHeight / ratio;
+
+
+
+            // Make the canvas the same size
+            //canvas.width  = displayWidth;
+            //canvas.height = displayHeight;
+            canvas.height = newHeight;
+            canvas.width = newWidth;
+
+            // Set the viewport to match
+            gl.viewport(0, 0, canvas.width, canvas.height);
+        }
     }
 
     return {
