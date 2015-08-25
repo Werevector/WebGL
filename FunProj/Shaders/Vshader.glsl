@@ -18,7 +18,7 @@ void main() {
 
     //gl_Position = vPosition;
     gl_Position = rz * vPosition;
-    vColor = vec4((1.0+vPosition.xyz), 1.0);
+    vColor = vec4((1.0+vPosition.xyz) * (cos(theta*theta)) ,  1.0);
     fColor = vColor;
 
 

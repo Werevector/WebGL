@@ -18,8 +18,8 @@ var main = (function() {
         //Loading canvas from the HTML Element
         browserCanvas = document.getElementById("gl-canvas");
 
-        browserCanvas.width = 300;
-        browserCanvas.height = 400;
+        browserCanvas.width = 16;
+        browserCanvas.height = 9;
 
 
         glContext = WebGLUtils.setupWebGL(browserCanvas);
@@ -80,25 +80,28 @@ var main = (function() {
         var canvas = gl.canvas;
         //console.log("resize");
         // Lookup the size the browser is displaying the canvas.
-        var displayWidth  = canvas.clientWidth;
-        var displayHeight = canvas.clientHeight;
+        var displayWidth  = window.innerWidth;
+        var displayHeight = window.innerHeight;
 
-        console.log("displayWidth: " + displayWidth + "\n" + "clientWidth: "  + canvas.clientWidth );
-        console.log("displayHeight: " + displayHeight + "\n" + "clientHeight: "  + canvas.clientHeight );
-        console.log("---------------------------------------------------------------------");
+        //console.log("displayWidth: " + displayWidth + "\n" + "clientWidth: "  + canvas.clientWidth );
+        //console.log("displayHeight: " + displayHeight + "\n" + "clientHeight: "  + canvas.clientHeight );
+        //console.log("---------------------------------------------------------------------");
+
+
 
         // Check if the canvas is not the same size.
         if (canvas.width  != displayWidth ||
             canvas.height != displayHeight) {
-            console.log("hei if setning");
+            //console.log("hei if setning");
+
             var w = canvas.width;
             var h = canvas.height;
+
             var ratio = w/h;
 
+            console.log(ratio);
             var newHeight = displayWidth / ratio;
             var newWidth = displayHeight / ratio;
-
-
 
             // Make the canvas the same size
             //canvas.width  = displayWidth;
