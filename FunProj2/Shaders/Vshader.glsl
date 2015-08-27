@@ -1,5 +1,5 @@
 attribute vec4 vPosition;
-varying vec4 vColor;
+attribute vec4 vColor;
 varying vec4 fColor;
 uniform vec3 theta;
 
@@ -9,7 +9,6 @@ void main() {
      vec3 c = cos( theta );
      vec3 s = sin( theta );
 
-     // Remeber: these matrices are column-major
      mat4 rx = mat4( 1.0,  0.0,  0.0, 0.0,
  		    0.0,  c.x,  s.x, 0.0,
  		    0.0, -s.x,  c.x, 0.0,

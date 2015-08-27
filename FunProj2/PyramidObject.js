@@ -37,7 +37,7 @@ var PyramidObject = (function () {
             vec3(  0.5, -0.5,  0.5 ), //2
             vec3(  0.5, -0.5, -0.5 ), //3
             vec3( -0.5, -0.5, -0.5 ), //4
-            vec3(    0,    0,  0.5 ), //5
+            vec3(    0,  0.5,    0 ), //5
         ];
 
     var vertexColors = [
@@ -64,12 +64,8 @@ var PyramidObject = (function () {
         colorArray.push(vertexColors[indexArray[i]-1] );
 
         // for solid colored faces use
-        //colors.push(vertexColors[a]);
+        //colorArray.push(vertexColors[a]);
     }
-
-
-
-
   }
 
   return{

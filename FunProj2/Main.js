@@ -20,8 +20,8 @@ var main = (function() {
 
         //Loading canvas from the HTML Element
         browserCanvas = document.getElementById("gl-canvas");
-        browserCanvas.width = 900;
-        browserCanvas.height = 600;
+        browserCanvas.width = 1000;
+        browserCanvas.height = 1000;
 
         //Create the OpenGL context, to be used in the program
         glContext = WebGLUtils.setupWebGL(browserCanvas);
@@ -32,9 +32,11 @@ var main = (function() {
         //Initialize the pyramid object, that we are going to render
         PyramidObject.InitPyramid();
 
+        glContext.enable(glContext.DEPTH_TEST);
+
         //Set the viewport
         glContext.viewport(0, 0, browserCanvas.width, browserCanvas.height);
-        glContext.clearColor(0.0, 0.0, 0.0, 1.0);
+        glContext.clearColor(1.0, 1.0, 1.0, 1.0);
 
         //Load Shaders
         var program = initShaders(glContext,
@@ -106,7 +108,13 @@ var main = (function() {
                               0
                             );
 
-        theta[1] += 0.01;
+        theta[0] += 0.1;
+        theta[1] += 0;
+        theta[2] += 0.1;
+
+        if (theta[1] >= 10000){
+          theta[1] = 0
+        }
 
         glContext.uniform3fv(thetaLoc, theta);
 
