@@ -11,6 +11,11 @@ var scaleLoc;
 
 var time;
 
+var Current_MAX;
+var Current_IArr;
+var Current_CArr;
+var Current_VArr;
+
 
 var main = (function() {
 
@@ -33,9 +38,6 @@ var main = (function() {
       alert("WebGl isn't available");
     }
 
-    //Initialize the pyramid object, that we are going to render
-    PyramidObject.InitPyramid();
-
     glContext.enable(glContext.DEPTH_TEST);
 
     //Set the viewport
@@ -51,45 +53,25 @@ var main = (function() {
     //Initialize atrribute buffers
     glContext.useProgram(program);
 
-    // var points = [
-    //   vec3(-0.5, -0.5, 0.5), //1
-    //   vec3(0.5, -0.5, 0.5), //2
-    //   vec3(0.5, -0.5, -0.5), //3
-    //   vec3(-0.5, -0.5, -0.5), //4
-    //   vec3(0, 0.5, 0), //5
-    // ];
-    //
-    // var vertexColors = [
-    //     vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
-    //     vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
-    //     vec4( 1.0, 1.0, 0.0, 1.0 ),  // yellow
-    //     vec4( 0.0, 1.0, 0.0, 1.0 ),  // green
-    //     vec4( 0.0, 0.0, 1.0, 1.0 ),  // blue
-    // ];
-    //
-    // //The Pyramid consists of 6 triangles
-    // var indexArray = [
-    //   0, 1, 4,
-    //   1, 2, 4,
-    //   2, 3, 4,
-    //   0, 3, 4,
-    //   0, 1, 2,
-    //   0, 3, 2
-    // ];
+    ArmSegment.GenerateLinkPoints(1.0, 1.0, 1.0);
 
+    Current_MAX = ArmSegment.GetVertexCount();
+    Current_IArr = ArmSegment.GetIndexColl();
+    Current_CArr = ArmSegment.GetColorColl();
+    Current_VArr = ArmSegment.GetVertexColl();
 
     /*Load data into GPU*/
     /********************/
 
     var iBuffer = glContext.createBuffer();
     glContext.bindBuffer(glContext.ELEMENT_ARRAY_BUFFER, iBuffer);
-    glContext.bufferData(glContext.ELEMENT_ARRAY_BUFFER, new Uint8Array(PyramidObject.GetIndexArray()), glContext.STATIC_DRAW);
+    glContext.bufferData(glContext.ELEMENT_ARRAY_BUFFER, new Uint8Array(Current_IArr), glContext.STATIC_DRAW);
 
     // color array atrribute buffer
 
     var cBuffer = glContext.createBuffer();
     glContext.bindBuffer( glContext.ARRAY_BUFFER, cBuffer );
-    glContext.bufferData( glContext.ARRAY_BUFFER, flatten( PyramidObject.GetColorArray() ), glContext.STATIC_DRAW );
+    glContext.bufferData( glContext.ARRAY_BUFFER, flatten( Current_CArr ), glContext.STATIC_DRAW );
 
     var vColor = glContext.getAttribLocation( program, "vColor" );
     glContext.vertexAttribPointer( vColor, 4, glContext.FLOAT, false, 0, 0 );
@@ -99,7 +81,7 @@ var main = (function() {
 
     var vBuffer = glContext.createBuffer();
     glContext.bindBuffer( glContext.ARRAY_BUFFER, vBuffer );
-    glContext.bufferData( glContext.ARRAY_BUFFER, flatten( PyramidObject.GetPoints() ), glContext.STATIC_DRAW );
+    glContext.bufferData( glContext.ARRAY_BUFFER, flatten( Current_VArr ), glContext.STATIC_DRAW );
 
     var vPosition = glContext.getAttribLocation( program, "vPosition" );
     glContext.vertexAttribPointer( vPosition, 3, glContext.FLOAT, false, 0, 0 );
@@ -109,7 +91,6 @@ var main = (function() {
     thetaLoc = glContext.getUniformLocation(program, "theta");
     scaleLoc = glContext.getUniformLocation(program, "scale");
 
-
     render();
 
   }
@@ -118,13 +99,13 @@ var main = (function() {
   function render() {
 
     glContext.clear( glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
-    glContext.drawElements( glContext.TRIANGLES, 18, glContext.UNSIGNED_BYTE, 0 );
+    glContext.drawElements( glContext.TRIANGLES, Current_MAX, glContext.UNSIGNED_BYTE, 0 );
 
-    theta[0] += 0.0;
-    theta[1] += 0.1;
-    theta[2] += 0.0;
+    theta[0] += 0.01;
+    theta[1] += 0.01;
+    theta[2] += 0.01;
 
-    time += 0.01;
+    time += 0.00;
     scale = (Math.sin(time) + 1) / 2
 
     if (time >= 10000) {
