@@ -1,31 +1,39 @@
 "use strict"
 
-
 var glContext;
-//var colorArray = [0.0,0.0,0.0,1.0];
-var theta;
-var thetaLoc;
-
-var scale;
-var scaleLoc;
-
-var time;
 
 var Current_MAX;
 var Current_IArr;
 var Current_CArr;
 var Current_VArr;
 
+var modelMatrix;
+var modelMatrixUniform;
+
+var viewMatrix;
+var viewMatrixUniform;
+
+var projectionMatrix;
+var projectionMatrixUniform;
+
+var solidColor;
+var solidColorUniform;
+
+var robotBase;
+var robotLowerArm;
+var robotUpperArm;
+
+var time = 0;
+
+var vertexColor ;
+
+var vertexPosition;
 
 var main = (function() {
 
   var browserCanvas;
 
   function init() {
-
-    //Set the Angle theta to 0
-    theta = [0, 0, 0];
-    time = 0;
 
     //Loading canvas from the HTML Element
     browserCanvas = document.getElementById("gl-canvas");
@@ -37,6 +45,8 @@ var main = (function() {
     if (!glContext) {
       alert("WebGl isn't available");
     }
+
+
 
     glContext.enable(glContext.DEPTH_TEST);
 
@@ -53,76 +63,77 @@ var main = (function() {
     //Initialize atrribute buffers
     glContext.useProgram(program);
 
-    ArmSegment.GenerateLinkPoints(1.0, 1.0, 1.0);
 
-    Current_MAX = ArmSegment.GetVertexCount();
-    Current_IArr = ArmSegment.GetIndexColl();
-    Current_CArr = ArmSegment.GetColorColl();
-    Current_VArr = ArmSegment.GetVertexColl();
+    robotBase = new SquareClass(1, 0.2, 1);
+    robotLowerArm = new SquareClass(0.2, 1, 0.2);
+    robotUpperArm = new SquareClass(0.1, 1, 0.1);
 
-    /*Load data into GPU*/
-    /********************/
+    vertexColor = glContext.getAttribLocation(program, "vColor");
+    vertexPosition = glContext.getAttribLocation(program, "vPosition");
 
-    var iBuffer = glContext.createBuffer();
-    glContext.bindBuffer(glContext.ELEMENT_ARRAY_BUFFER, iBuffer);
-    glContext.bufferData(glContext.ELEMENT_ARRAY_BUFFER, new Uint8Array(Current_IArr), glContext.STATIC_DRAW);
+    modelMatrixUniform = glContext.getUniformLocation(program, "modelMatrix");
+    viewMatrixUniform = glContext.getUniformLocation(program, "viewMatrix");
+    solidColorUniform = glContext.getUniformLocation(program, "solidColor");
 
-    // color array atrribute buffer
-
-    var cBuffer = glContext.createBuffer();
-    glContext.bindBuffer( glContext.ARRAY_BUFFER, cBuffer );
-    glContext.bufferData( glContext.ARRAY_BUFFER, flatten( Current_CArr ), glContext.STATIC_DRAW );
-
-    var vColor = glContext.getAttribLocation( program, "vColor" );
-    glContext.vertexAttribPointer( vColor, 4, glContext.FLOAT, false, 0, 0 );
-    glContext.enableVertexAttribArray( vColor );
-
-    // vertex array attribute buffer
-
-    var vBuffer = glContext.createBuffer();
-    glContext.bindBuffer( glContext.ARRAY_BUFFER, vBuffer );
-    glContext.bufferData( glContext.ARRAY_BUFFER, flatten( Current_VArr ), glContext.STATIC_DRAW );
-
-    var vPosition = glContext.getAttribLocation( program, "vPosition" );
-    glContext.vertexAttribPointer( vPosition, 3, glContext.FLOAT, false, 0, 0 );
-    glContext.enableVertexAttribArray( vPosition );
+    projectionMatrix = ortho(-2, 2, -2, 2, -2, 2);
+    projectionMatrixUniform = glContext.getUniformLocation(program, "projectionMatrix");
+	  glContext.uniformMatrix4fv( projectionMatrixUniform,  false, flatten(projectionMatrix) );
 
 
-    thetaLoc = glContext.getUniformLocation(program, "theta");
-    scaleLoc = glContext.getUniformLocation(program, "scale");
+
+    robotBase.angles = [0,0,0];
+    robotLowerArm.angles = [0.0,0.0,0.0];
+    robotUpperArm.angles = [0,0,0];
 
     render();
-
   }
 
   //Render the whole thing
   function render() {
+    glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
 
-    glContext.clear( glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
-    glContext.drawElements( glContext.TRIANGLES, Current_MAX, glContext.UNSIGNED_BYTE, 0 );
+    solidColor = vec4(0.0, 0.0, 1.0, 1.0);
+    glContext.uniform4fv(solidColorUniform, flatten(solidColor));
 
-    theta[0] += 0.01;
-    theta[1] += 0.01;
-    theta[2] += 0.01;
+    modelMatrix = rotationMatrix(robotBase.angles);
+    robotBase.draw(modelMatrix, vertexColor, vertexPosition);
 
-    time += 0.00;
-    scale = (Math.sin(time) + 1) / 2
+    solidColor = vec4(0.0, 1.0, 0.0, 1.0);
+    glContext.uniform4fv(solidColorUniform, flatten(solidColor));
 
-    if (time >= 10000) {
-      time = 0
-    }
+    modelMatrix = mult(modelMatrix, translate(0, robotBase.height, 0));
+    modelMatrix = mult(modelMatrix, rotationMatrix(robotLowerArm.angles));
+    robotLowerArm.draw(modelMatrix, vertexColor, vertexPosition);
 
+    solidColor = vec4(1.0, 0.0, 0.0, 1.0);
+    glContext.uniform4fv(solidColorUniform, flatten(solidColor));
 
-    glContext.uniform3fv(thetaLoc, theta);
-    glContext.uniform1f(scaleLoc, scale);
+    modelMatrix = mult(modelMatrix, translate(0, robotLowerArm.height,0));
+    modelMatrix = mult(modelMatrix, rotationMatrix(robotUpperArm.angles));
+    robotUpperArm.draw(modelMatrix, vertexColor, vertexPosition);
 
-    //Callback to animate the pyramids rotation
+    time += 0.1;
+    robotBase.angles[0] += 0.2;
+    robotBase.angles[1] += 0.2;
+    robotBase.angles[2] += 0.2;
+    robotLowerArm.angles[0] += 0;
+    robotUpperArm.angles[0] += Math.sin(time)*time/2;
+    robotUpperArm.angles[1] += Math.sin(time)*time/2;
+    robotUpperArm.angles[2] += Math.sin(time)*time/2;
+
+      robotLowerArm.angles[0] += Math.cos(time)*time;
+
     requestAnimFrame(render);
+  }
 
+  function rotationMatrix(angles){
+    var rx = rotate(angles[0], 1, 0, 0);
+    var ry = rotate(angles[1], 0, 1, 0);
+    var rz = rotate(angles[2], 0, 0, 1);
+    return mult(rz, mult(ry, rx));
   }
 
   return {
     init: init
   }
-
 })();

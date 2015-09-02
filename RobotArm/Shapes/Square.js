@@ -1,5 +1,5 @@
 "use strict";
-var ArmSegment = (function()
+var Square = (function()
 {
 
   var MODEL_POINT_NUMBER = 36;
@@ -28,7 +28,7 @@ var ArmSegment = (function()
 
   //Use indexing to create the base points for the shape, and then create
   //triangles to form the shape
-  function GenerateLinkPoints(x,y,z){
+  function GeneratePoints(x,y,z){
     XVector = x;
     YVector = y;
     ZVector = z;
@@ -76,6 +76,14 @@ var ArmSegment = (function()
     ];
   }
 
+  function TranslateTo(point){
+    for(var i = 0; i < vertexColl.length; i++){
+      vertexColl[i][0] + point[0];
+      vertexColl[i][1] + point[1];
+      vertexColl[i][2] + point[2];
+    }
+  }
+
   function GetVertexCount(){
     return MODEL_POINT_NUMBER;
   }
@@ -93,11 +101,11 @@ var ArmSegment = (function()
   }
 
   return{
-    GenerateLinkPoints: GenerateLinkPoints,
+    GeneratePoints: GeneratePoints,
+    TranslateTo: TranslateTo,
     GetVertexCount: GetVertexCount,
     GetVertexColl: GetVertexColl,
     GetIndexColl: GetIndexColl,
     GetColorColl: GetColorColl
   }
-
 }) ();
