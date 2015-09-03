@@ -22,6 +22,10 @@ var solidColorUniform;
 var robotBase;
 var robotLowerArm;
 var robotUpperArm;
+var robotLeftFinger;
+var robotRightFinger;
+var robotOuterRFinger;
+var robotOuterLFinger;
 
 var time = 0;
 
@@ -64,9 +68,14 @@ var main = (function() {
     glContext.useProgram(program);
 
 
-    robotBase = new SquareClass(1, 0.2, 1);
-    robotLowerArm = new SquareClass(0.2, 1, 0.2);
-    robotUpperArm = new SquareClass(0.1, 1, 0.1);
+    robotBase = new SquareClass(1, 0.1, 1);
+    robotLowerArm = new SquareClass(0.1, 0.9, 0.1);
+    robotUpperArm = new SquareClass(0.1, 0.6, 0.1);
+    robotLeftFinger = new SquareClass(0.05, 0.3, 0.05);
+    robotRightFinger = new SquareClass(0.05, 0.3, 0.05);
+
+    robotOuterRFinger = new SquareClass(0.05, 0.3, 0.05);
+    robotOuterLFinger = new SquareClass(0.05, 0.3, 0.05);
 
     vertexColor = glContext.getAttribLocation(program, "vColor");
     vertexPosition = glContext.getAttribLocation(program, "vPosition");
@@ -81,9 +90,14 @@ var main = (function() {
 
 
 
-    robotBase.angles = [0,0,0];
+    robotBase.angles = [180,180,180];
     robotLowerArm.angles = [0.0,0.0,0.0];
-    robotUpperArm.angles = [0,0,0];
+    robotUpperArm.angles = [50,0,0];
+    robotLeftFinger.angles = [30,0,60];
+    robotRightFinger.angles = [30,0,-60];
+
+    robotOuterRFinger.angles = [40, 0, -10];
+    robotOuterLFinger.angles = [40, 0, 10];
 
     render();
   }
@@ -92,36 +106,64 @@ var main = (function() {
   function render() {
     glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
 
-    solidColor = vec4(0.0, 0.0, 1.0, 1.0);
+    solidColor = vec4(0.0, 1.0, 0.0, 1.0);
     glContext.uniform4fv(solidColorUniform, flatten(solidColor));
 
     modelMatrix = rotationMatrix(robotBase.angles);
     robotBase.draw(modelMatrix, vertexColor, vertexPosition);
 
-    solidColor = vec4(0.0, 1.0, 0.0, 1.0);
+    solidColor = vec4(1.0, 0.0, 0.0, 1.0);
     glContext.uniform4fv(solidColorUniform, flatten(solidColor));
 
     modelMatrix = mult(modelMatrix, translate(0, robotBase.height, 0));
     modelMatrix = mult(modelMatrix, rotationMatrix(robotLowerArm.angles));
     robotLowerArm.draw(modelMatrix, vertexColor, vertexPosition);
 
-    solidColor = vec4(1.0, 0.0, 0.0, 1.0);
+    solidColor = vec4(0.0, 0.0, 1.0, 1.0);
     glContext.uniform4fv(solidColorUniform, flatten(solidColor));
 
     modelMatrix = mult(modelMatrix, translate(0, robotLowerArm.height,0));
     modelMatrix = mult(modelMatrix, rotationMatrix(robotUpperArm.angles));
     robotUpperArm.draw(modelMatrix, vertexColor, vertexPosition);
 
-    time += 0.1;
-    robotBase.angles[0] += 0.2;
-    robotBase.angles[1] += 0.2;
-    robotBase.angles[2] += 0.2;
-    robotLowerArm.angles[0] += 0;
-    robotUpperArm.angles[0] += Math.sin(time)*time/2;
-    robotUpperArm.angles[1] += Math.sin(time)*time/2;
-    robotUpperArm.angles[2] += Math.sin(time)*time/2;
 
-      robotLowerArm.angles[0] += Math.cos(time)*time;
+    modelMatrix = mult(modelMatrix, translate(0, robotUpperArm.height,0));
+
+    solidColor = vec4(0.4, 4.0, 0.3, 1.0);
+    glContext.uniform4fv(solidColorUniform, flatten(solidColor));
+    var modelMatrix2 = mult(modelMatrix, rotationMatrix(robotLeftFinger.angles));
+    robotLeftFinger.draw(modelMatrix2, vertexColor, vertexPosition);
+
+    modelMatrix2 = mult(modelMatrix2, translate(0, robotRightFinger.height,0));
+    modelMatrix2 = mult(modelMatrix2, rotationMatrix(robotOuterRFinger.angles));
+    robotOuterRFinger.draw(modelMatrix2, vertexColor, vertexPosition);
+
+    solidColor = vec4(1.0, 0.0, 0.0, 1.0);
+    glContext.uniform4fv(solidColorUniform, flatten(solidColor));
+    var modelMatrix = mult(modelMatrix, rotationMatrix(robotRightFinger.angles));
+    robotRightFinger.draw(modelMatrix, vertexColor, vertexPosition);
+
+    modelMatrix = mult(modelMatrix, translate(0, robotLeftFinger.height,0));
+    modelMatrix = mult(modelMatrix, rotationMatrix(robotOuterLFinger.angles));
+    robotOuterRFinger.draw(modelMatrix, vertexColor, vertexPosition);
+
+
+    time += 0.1;
+    robotBase.angles[0] += 0.5;
+    robotBase.angles[1] += 0.5;
+    robotBase.angles[2] += 0.5;
+    robotLowerArm.angles[0] += 0;
+    //robotUpperArm.angles[0] += Math.sin(time)*1;
+    // robotUpperArm.angles[1] += Math.sin(time)*time/2;
+    // robotUpperArm.angles[2] += Math.sin(time)*time/2;
+
+  //  robotLowerArm.angles[0] += Math.cos(time)*5;
+
+    robotRightFinger.angles[2] += Math.sin(time);
+    robotLeftFinger.angles[2] -= Math.sin(time);
+
+    robotOuterRFinger.angles[2] += Math.cos(time);
+    robotOuterLFinger.angles[2] -= Math.cos(time);
 
     requestAnimFrame(render);
   }
