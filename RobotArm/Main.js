@@ -19,6 +19,8 @@ var projectionMatrixUniform;
 var solidColor;
 var solidColorUniform;
 
+var robotSpeed = 5;
+
 var robotBase;
 var robotLowerArm;
 var robotUpperArm;
@@ -56,7 +58,7 @@ var main = (function() {
 
     //Set the viewport
     glContext.viewport(0, 0, browserCanvas.width, browserCanvas.height);
-    glContext.clearColor(0.0, 0.0, 0.0, 1.0);
+    glContext.clearColor(1.0, 1.0, 1.0, 1.0);
 
     //Load Shaders
     var program = initShaders(glContext,
@@ -89,15 +91,76 @@ var main = (function() {
 	  glContext.uniformMatrix4fv( projectionMatrixUniform,  false, flatten(projectionMatrix) );
 
 
+    window.onkeydown = function(event)
+    {
+      var key = String.fromCharCode(event.keyCode);
 
-    robotBase.angles = [180,180,180];
+      switch(key)
+      {
+        case 'W':
+          if(robotLowerArm.angles[0]<50)
+          {
+            robotLowerArm.angles[0] += robotSpeed;
+          }
+          break;
+        case 'S':
+
+          if(robotLowerArm.angles[0]>0)
+          {
+            robotLowerArm.angles[0] -= robotSpeed;
+          }
+          break;
+        case '&':
+          if(robotUpperArm.angles[0] < 90)
+          {
+            robotUpperArm.angles[0] += robotSpeed;
+          }
+          break;
+        case '(':
+          if(robotUpperArm.angles[0] > 0)
+          {
+            robotUpperArm.angles[0] -= robotSpeed;
+          }
+          break;
+        case 'A':
+          robotBase.angles[1] += robotSpeed;
+          break;
+        case 'D':
+          robotBase.angles[1] -= robotSpeed;
+          break;
+        case 'Q':
+          if(robotOuterRFinger.angles[2]<-10)
+          {
+            robotRightFinger.angles[2] -= robotSpeed/5;
+            robotLeftFinger.angles[2] += robotSpeed/5;
+
+            robotOuterRFinger.angles[2] += robotSpeed;
+            robotOuterLFinger.angles[2] -= robotSpeed;
+          }
+          break;
+        case 'E':
+          if(robotOuterRFinger.angles[2]>-70)
+          {
+            robotRightFinger.angles[2] += robotSpeed/5;
+            robotLeftFinger.angles[2] -= robotSpeed/5;
+
+            robotOuterRFinger.angles[2] -= robotSpeed;
+            robotOuterLFinger.angles[2] += robotSpeed;
+          }
+          break;
+
+      }
+    };
+
+
+    robotBase.angles = [0,770,0];
     robotLowerArm.angles = [0.0,0.0,0.0];
     robotUpperArm.angles = [50,0,0];
     robotLeftFinger.angles = [30,0,60];
     robotRightFinger.angles = [30,0,-60];
 
-    robotOuterRFinger.angles = [40, 0, -10];
-    robotOuterLFinger.angles = [40, 0, 10];
+    robotOuterRFinger.angles = [40, 0, -9];
+    robotOuterLFinger.angles = [40, 0, 9];
 
     render();
   }
@@ -128,8 +191,8 @@ var main = (function() {
 
 
     modelMatrix = mult(modelMatrix, translate(0, robotUpperArm.height,0));
-
-    solidColor = vec4(0.4, 4.0, 0.3, 1.0);
+    //modelMatrix = mult(modelMatrix, translate(0, robotUpperArm.height,robotUpperArm.width));
+    solidColor = vec4(0.4, 0.0, 0.3, 1.0);
     glContext.uniform4fv(solidColorUniform, flatten(solidColor));
     var modelMatrix2 = mult(modelMatrix, rotationMatrix(robotLeftFinger.angles));
     robotLeftFinger.draw(modelMatrix2, vertexColor, vertexPosition);
@@ -138,7 +201,7 @@ var main = (function() {
     modelMatrix2 = mult(modelMatrix2, rotationMatrix(robotOuterRFinger.angles));
     robotOuterRFinger.draw(modelMatrix2, vertexColor, vertexPosition);
 
-    solidColor = vec4(1.0, 0.0, 0.0, 1.0);
+    //solidColor = vec4(1.0, 0.0, 0.0, 1.0);
     glContext.uniform4fv(solidColorUniform, flatten(solidColor));
     var modelMatrix = mult(modelMatrix, rotationMatrix(robotRightFinger.angles));
     robotRightFinger.draw(modelMatrix, vertexColor, vertexPosition);
@@ -149,21 +212,28 @@ var main = (function() {
 
 
     time += 0.1;
-    robotBase.angles[0] += 0.5;
-    robotBase.angles[1] += 0.5;
-    robotBase.angles[2] += 0.5;
+    // robotBase.angles[0] += 0.5;
+    // robotBase.angles[1] += 0.5;
+    // robotBase.angles[2] += 0.5;
+
+
+
+
+
+
     robotLowerArm.angles[0] += 0;
+
     //robotUpperArm.angles[0] += Math.sin(time)*1;
     // robotUpperArm.angles[1] += Math.sin(time)*time/2;
     // robotUpperArm.angles[2] += Math.sin(time)*time/2;
 
   //  robotLowerArm.angles[0] += Math.cos(time)*5;
 
-    robotRightFinger.angles[2] += Math.sin(time);
-    robotLeftFinger.angles[2] -= Math.sin(time);
-
-    robotOuterRFinger.angles[2] += Math.cos(time);
-    robotOuterLFinger.angles[2] -= Math.cos(time);
+    // robotRightFinger.angles[2] += Math.sin(time);
+    // robotLeftFinger.angles[2] -= Math.sin(time);
+    //
+    // robotOuterRFinger.angles[2] += Math.cos(time);
+    // robotOuterLFinger.angles[2] -= Math.cos(time);
 
     requestAnimFrame(render);
   }

@@ -7,7 +7,7 @@ attribute vec4 vPosition;
   uniform vec4 solidColor;
 	void main()
 	{
-		fColor = vec4(0.5 + vPosition.xyz, 1.0);
-		//fColor = solidColor;
+		//fColor = vec4(0.5 + vPosition.xyz, 1.0);
+		fColor = solidColor;
 		gl_Position = projectionMatrix * modelMatrix * vPosition;
 	}
