@@ -33,6 +33,8 @@ var time = 0;
 
 var vertexColor ;
 
+var keyboardState = [];
+
 var vertexPosition;
 
 var main = (function() {
@@ -43,8 +45,8 @@ var main = (function() {
 
     //Loading canvas from the HTML Element
     browserCanvas = document.getElementById("gl-canvas");
-    browserCanvas.width = 600;
-    browserCanvas.height = 600;
+    browserCanvas.width = 1100;
+    browserCanvas.height = 1100;
 
     //Create the OpenGL context, to be used in the program
     glContext = WebGLUtils.setupWebGL(browserCanvas);
@@ -70,8 +72,8 @@ var main = (function() {
     glContext.useProgram(program);
 
 
-    robotBase = new SquareClass(1, 0.1, 1);
-    robotLowerArm = new SquareClass(0.1, 0.9, 0.1);
+    robotBase = new SquareClass(1, 0.2, 1);
+    robotLowerArm = new SquareClass(0.15, 0.9, 0.15);
     robotUpperArm = new SquareClass(0.1, 0.6, 0.1);
     robotLeftFinger = new SquareClass(0.05, 0.3, 0.05);
     robotRightFinger = new SquareClass(0.05, 0.3, 0.05);
@@ -90,66 +92,11 @@ var main = (function() {
     projectionMatrixUniform = glContext.getUniformLocation(program, "projectionMatrix");
 	  glContext.uniformMatrix4fv( projectionMatrixUniform,  false, flatten(projectionMatrix) );
 
-
-    window.onkeydown = function(event)
-    {
-      var key = String.fromCharCode(event.keyCode);
-
-      switch(key)
-      {
-        case 'W':
-          if(robotLowerArm.angles[0]<50)
-          {
-            robotLowerArm.angles[0] += robotSpeed;
-          }
-          break;
-        case 'S':
-
-          if(robotLowerArm.angles[0]>0)
-          {
-            robotLowerArm.angles[0] -= robotSpeed;
-          }
-          break;
-        case '&':
-          if(robotUpperArm.angles[0] < 90)
-          {
-            robotUpperArm.angles[0] += robotSpeed;
-          }
-          break;
-        case '(':
-          if(robotUpperArm.angles[0] > 0)
-          {
-            robotUpperArm.angles[0] -= robotSpeed;
-          }
-          break;
-        case 'A':
-          robotBase.angles[1] += robotSpeed;
-          break;
-        case 'D':
-          robotBase.angles[1] -= robotSpeed;
-          break;
-        case 'Q':
-          if(robotOuterRFinger.angles[2]<-10)
-          {
-            robotRightFinger.angles[2] -= robotSpeed/5;
-            robotLeftFinger.angles[2] += robotSpeed/5;
-
-            robotOuterRFinger.angles[2] += robotSpeed;
-            robotOuterLFinger.angles[2] -= robotSpeed;
-          }
-          break;
-        case 'E':
-          if(robotOuterRFinger.angles[2]>-70)
-          {
-            robotRightFinger.angles[2] += robotSpeed/5;
-            robotLeftFinger.angles[2] -= robotSpeed/5;
-
-            robotOuterRFinger.angles[2] -= robotSpeed;
-            robotOuterLFinger.angles[2] += robotSpeed;
-          }
-          break;
-
-      }
+    window.onkeydown = function(e){
+    keyboardState[e.keyCode || e.which] = true;
+    };
+    window.onkeyup = function(e){
+    keyboardState[e.keyCode || e.which] = false;
     };
 
 
@@ -191,7 +138,7 @@ var main = (function() {
 
 
     modelMatrix = mult(modelMatrix, translate(0, robotUpperArm.height,0));
-    //modelMatrix = mult(modelMatrix, translate(0, robotUpperArm.height,robotUpperArm.width));
+
     solidColor = vec4(0.4, 0.0, 0.3, 1.0);
     glContext.uniform4fv(solidColorUniform, flatten(solidColor));
     var modelMatrix2 = mult(modelMatrix, rotationMatrix(robotLeftFinger.angles));
@@ -201,7 +148,6 @@ var main = (function() {
     modelMatrix2 = mult(modelMatrix2, rotationMatrix(robotOuterRFinger.angles));
     robotOuterRFinger.draw(modelMatrix2, vertexColor, vertexPosition);
 
-    //solidColor = vec4(1.0, 0.0, 0.0, 1.0);
     glContext.uniform4fv(solidColorUniform, flatten(solidColor));
     var modelMatrix = mult(modelMatrix, rotationMatrix(robotRightFinger.angles));
     robotRightFinger.draw(modelMatrix, vertexColor, vertexPosition);
@@ -210,30 +156,11 @@ var main = (function() {
     modelMatrix = mult(modelMatrix, rotationMatrix(robotOuterLFinger.angles));
     robotOuterRFinger.draw(modelMatrix, vertexColor, vertexPosition);
 
+    HandleKeyboardState();
+
 
     time += 0.1;
-    // robotBase.angles[0] += 0.5;
-    // robotBase.angles[1] += 0.5;
-    // robotBase.angles[2] += 0.5;
 
-
-
-
-
-
-    robotLowerArm.angles[0] += 0;
-
-    //robotUpperArm.angles[0] += Math.sin(time)*1;
-    // robotUpperArm.angles[1] += Math.sin(time)*time/2;
-    // robotUpperArm.angles[2] += Math.sin(time)*time/2;
-
-  //  robotLowerArm.angles[0] += Math.cos(time)*5;
-
-    // robotRightFinger.angles[2] += Math.sin(time);
-    // robotLeftFinger.angles[2] -= Math.sin(time);
-    //
-    // robotOuterRFinger.angles[2] += Math.cos(time);
-    // robotOuterLFinger.angles[2] -= Math.cos(time);
 
     requestAnimFrame(render);
   }
@@ -243,6 +170,67 @@ var main = (function() {
     var ry = rotate(angles[1], 0, 1, 0);
     var rz = rotate(angles[2], 0, 0, 1);
     return mult(rz, mult(ry, rx));
+  }
+
+  function HandleKeyboardState(){
+    // W
+    if(keyboardState[87]){
+      if(robotLowerArm.angles[0]<50)
+      {
+        robotLowerArm.angles[0] += robotSpeed;
+      }
+    }
+    // S
+    if(keyboardState[83]){
+      if(robotLowerArm.angles[0]>0)
+      {
+        robotLowerArm.angles[0] -= robotSpeed;
+      }
+    }
+    // UP
+    if(keyboardState[38]){
+      if(robotUpperArm.angles[0] < 90)
+      {
+        robotUpperArm.angles[0] += robotSpeed;
+      }
+    }
+    //DOWN
+    if(keyboardState[40]){
+      if(robotUpperArm.angles[0] > 0)
+      {
+        robotUpperArm.angles[0] -= robotSpeed;
+      }
+    }
+    //A
+    if(keyboardState[65]){
+      robotBase.angles[1] += robotSpeed;
+    }
+    //D
+    if(keyboardState[68]){
+      robotBase.angles[1] -= robotSpeed;
+    }
+    //Q
+    if(keyboardState[81]){
+      if(robotOuterRFinger.angles[2]<-10)
+      {
+        robotRightFinger.angles[2] -= robotSpeed/5;
+        robotLeftFinger.angles[2] += robotSpeed/5;
+
+        robotOuterRFinger.angles[2] += robotSpeed;
+        robotOuterLFinger.angles[2] -= robotSpeed;
+      }
+    }
+    //E
+    if(keyboardState[69]){
+      if(robotOuterRFinger.angles[2]>-70)
+      {
+        robotRightFinger.angles[2] += robotSpeed/5;
+        robotLeftFinger.angles[2] -= robotSpeed/5;
+
+        robotOuterRFinger.angles[2] -= robotSpeed;
+        robotOuterLFinger.angles[2] += robotSpeed;
+      }
+    }
   }
 
   return {
