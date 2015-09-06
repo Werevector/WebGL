@@ -21,6 +21,11 @@ function SquareClass(x,y,z)
   this.length = z;
   this.width = x;
 
+  this.modelMatrix = mat4();
+  this.rotationMatrix = mat4();
+  this.translationMatrix = mat4();
+  this.scaleMatrix = mat4();
+
 
   var XVector = x;
   var YVector = y;
@@ -92,10 +97,37 @@ function SquareClass(x,y,z)
   glContext.bindBuffer(glContext.ARRAY_BUFFER, this.vertexBuffer);
   glContext.bufferData(glContext.ARRAY_BUFFER, flatten(this.vertexColl), glContext.STATIC_DRAW);
 
-  this.draw = DrawCube
+  this.translate = TranslateCube;
+  this.rotate = RotateCube;
+  this.scale = ScaleCube;
+  this.addTransSet = AddTransformationSetOnCube;
+  this.getModelMatrix = GetTransformationMatrix;
+  this.draw = DrawCube;
 }
 
-function DrawCube(ModelMatrix, Vcolor, Vposition){
+function TranslateCube(x,y,z){
+  this.translationMatrix = mult(this.translationMatrix, translate(x,y,z));
+}
+
+function RotateCube(angles){
+  this.rotationMatrix = mult(this.rotationMatrix, rotationMatrix(angles));
+}
+
+function ScaleCube(x,y,z){
+  this.scaleMatrix = scalem(x,y,z);
+}
+
+function AddTransformationSetOnCube(transMat){
+  this.modelMatrix = mult(this.modelMatrix, transMat);
+}
+
+function GetTransformationMatrix(){
+  var returnMat = mult(this.translationMatrix, mult(this.scaleMatrix, this.rotationMatrix));
+  return returnMat;
+}
+
+function DrawCube(Vcolor, Vposition){
+
   glContext.enableVertexAttribArray(Vcolor);
   glContext.bindBuffer(glContext.ARRAY_BUFFER, this.colorBuffer);
   glContext.vertexAttribPointer(Vcolor, 3, glContext.FLOAT, false, 0, 0);
@@ -103,9 +135,17 @@ function DrawCube(ModelMatrix, Vcolor, Vposition){
   glContext.enableVertexAttribArray(Vposition);
   glContext.bindBuffer(glContext.ARRAY_BUFFER, this.vertexBuffer);
   glContext.vertexAttribPointer(Vposition, 3, glContext.FLOAT, false, 0, 0);
-
-  glContext.uniformMatrix4fv(modelMatrixUniform, false, flatten(ModelMatrix));
+  glContext.uniformMatrix4fv(modelMatrixUniform, false, flatten(this.getModelMatrix()));
 
   glContext.bindBuffer(glContext.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
   glContext.drawElements(glContext.TRIANGLES, this.MODEL_POINT_NUMBER, glContext.UNSIGNED_BYTE, 0);
+
+}
+
+function rotationMatrix(angles)
+{
+  var rx = rotate(angles[0], 1, 0, 0);
+  var ry = rotate(angles[1], 0, 1, 0);
+  var rz = rotate(angles[2], 0, 0, 1);
+  return mult(rz, mult(ry, rx));
 }
