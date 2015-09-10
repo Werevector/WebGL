@@ -18,11 +18,13 @@ var keyboardState = [];
 
 var keyboardStateX = new THREEx.KeyboardState();
 
-var cPos = vec3(0,0,5);
-var lookDir = vec3(0,0,-1);
-var cLook = add(cPos, lookDir);
-var cUp = vec3(0,1,0);
+// var cPos = vec3(0,0,5);
+// var lookDir = vec3(0,0,-1);
+// var cLook = add(cPos, lookDir);
+// var cUp = vec3(0,1,0);
 
+var camera;
+var cameraSpeed = [3,3,3];
 
 var floatingCube;
 
@@ -43,7 +45,10 @@ var main = (function() {
       alert("WebGl isn't available");
     }
 
-    floatingCube = new Cube(1,1,1);
+    floatingCube = new Cube(1,1,1)
+
+    camera = new Camera();
+    camera.position[2] = -5;
 
     glContext.enable(glContext.DEPTH_TEST);
 
@@ -67,10 +72,10 @@ var main = (function() {
     viewMatrixUniform = glContext.getUniformLocation(program, "viewMatrix");
     projectionMatrixUniform = glContext.getUniformLocation(program, "projectionMatrix");
 
-    projectionMatrix = perspective(70,1,0.1,1000);
+    projectionMatrix = perspective(70, 1, 0.1, 1000);
 	  glContext.uniformMatrix4fv( projectionMatrixUniform,  false, flatten(projectionMatrix) );
 
-    viewMatrix = lookAt(cPos,cLook,cUp);
+    viewMatrix = camera.getCameraView();
     glContext.uniformMatrix4fv(viewMatrixUniform, false, flatten(viewMatrix));
 
     window.onkeydown = function(e){
@@ -89,9 +94,13 @@ var main = (function() {
     glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
 
     HandleKeyboardState();
-    cLook = add(cPos, vec3(0,0,-1));
-    viewMatrix = lookAt(cPos,cLook,cUp);
+
+    viewMatrix = camera.getCameraView();
     glContext.uniformMatrix4fv(viewMatrixUniform, false, flatten(viewMatrix));
+
+
+    //floatingCube.angles[0]++;
+    //floatingCube.angles[2]++;
 
     floatingCube.draw(vertexColor, vertexPosition);
 
@@ -103,14 +112,14 @@ var main = (function() {
     if(keyboardState[87]){
       if(true)
       {
-        cPos[2] -= 1;
+        camera.position = add(camera.position, mult(camera.viewVector, cameraSpeed));
       }
     }
     // S
     if(keyboardState[83]){
       if(true)
       {
-        cPos[2] += 1;
+      camera.position = subtract(camera.position, mult(camera.viewVector, cameraSpeed));
       }
     }
 
@@ -132,11 +141,11 @@ var main = (function() {
 
     //A
     if(keyboardState[65]){
-      cPos[0] -= 1;
+      camera.position = add(camera.position, mult(camera.right, cameraSpeed));
     }
     //D
     if(keyboardState[68]){
-      cPos[0] += 1;
+      camera.position = subtract(camera.position, mult(camera.right, cameraSpeed));
     }
     // //Q
     // if(keyboardState[81]){
