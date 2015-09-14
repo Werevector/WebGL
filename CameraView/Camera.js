@@ -8,10 +8,11 @@ function Camera()
   this.position   = vec3(0,0,0);
   this.upVector   = vec3(0,1,0);
   this.lookPos    = vec3(0,0,0);
-  this.right      = vec3(0,0,0);
+  this.right      = vec3(1,0,0);
   this.getCameraView = ReturnCameraViewMatrix;
   this.setViewVector = SetCameraViewVector;
   this.setUp = SetCameraUp;
+  this.setRight = SetCameraRight;
 
   this.mouse = {
     initialized: false,
@@ -24,7 +25,7 @@ function Camera()
     deltaX: 0,
     deltaY: 0,
 
-    mouseSensitivity: 100,
+    mouseSensitivity: 90,
 
     // Have we used the deltaX and deltaY?
     consumedUpdate: false
@@ -37,29 +38,19 @@ function Camera()
 
 function ReturnCameraViewMatrix(tDelta)
 {
-  this.viewAngle = [0,0,this.viewAngle[2]];
-  this.updateAngle(tDelta);
-  // this.viewAngle[0] = this.viewAngle[0] * this.mouse.mouseSensitivity;
-  // this.viewAngle[1] = this.viewAngle[1] * this.mouse.mouseSensitivity;
-  // this.viewAngle[2] = this.viewAngle[2] * this.mouse.mouseSensitivity;
-  // var yawAngle = 0;
-  // var pitchAngle = 0;
-  // var rollAngle = 0;
 
+  this.viewAngle[0] = 0;
+  this.viewAngle[1] = 0;
+  this.updateAngle(tDelta);
 
   var yawRotation = rotate(this.viewAngle[0], this.upVector);
   var pitchRotation = rotate(this.viewAngle[1], cross(this.viewVector, this.upVector));
-  var rollRotation = rotate(this.viewAngle[2], this.viewVector );
+  var rollRotation = rotate(this.viewAngle[2], this.viewVector);
 
   // var yawThenPitchRot = mult(pitchRotation, yawRotation);
   var YP_Rot = mult(pitchRotation, yawRotation);
   var R_Rot = rollRotation;
 
-  // If we want to update the up direction (eg. roll) we should handle
-  // that independently, triggered by eg. a key press. It may be sensible to
-  // roll about the forwardDirection?
-
-  // Finally update the forward direction and (posssibly) the up directions
   this.setViewVector(vec3
   (
     dot(vec3(YP_Rot[0]), this.viewVector),
@@ -74,43 +65,27 @@ function ReturnCameraViewMatrix(tDelta)
     dot(vec3(R_Rot[2]), this.upVector)
   ));
 
-  this.right = cross(this.upVector, this.viewVector);
-
-  // this.viewVector = vec3
-  // (
-  //   Math.cos(this.viewAngle[1]) * Math.sin(this.viewAngle[0]),
-  //   Math.sin(this.viewAngle[1]),
-  //   Math.cos(this.viewAngle[1]) * Math.cos(this.viewAngle[0])
-  // );
-  //
-  // this.right = vec3
-  // (
-  //   Math.sin(this.viewAngle[0] - 3.14/2.0),
-  //   0,
-  //   Math.cos(this.viewAngle[0] - 3.14/2.0)
-  // );
-  //
-  // this.upVector = cross(this.viewVector, this.right);
-  //
+  this.right = cross(this.viewVector, this.upVector);
 
   this.viewAngle = [0,0,0];
+
   this.lookPos = add(this.position, this.viewVector);
-  var tempView = lookAt(this.position, this.lookPos, this.upVector);
-  //return mult(tempView, tempRot);
-  return tempView;
-  //return lookAt(this.position, this.lookPos, this.upVector);
-
-
-
+  var resultMat = lookAt(this.position, this.lookPos, this.upVector);
+  return resultMat;
 }
 
 function SetCameraViewVector(forwardDirection) {
     this.viewVector = normalize(vec3(forwardDirection));
 };
 
-function SetCameraUp(rightDirection) {
-    this.upVector = normalize(vec3(rightDirection));
+function SetCameraUp(upDirection) {
+    this.upVector = normalize(vec3(upDirection));
 };
+
+function SetCameraRight(rightDirection) {
+    this.right = normalize(vec3(rightDirection));
+};
+
 
 // function SetCameraViewVector(forwardDirection) {
 //     this.viewVector = normalize(vec3(forwardDirection));

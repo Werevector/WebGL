@@ -50,19 +50,20 @@ var main = (function() {
       alert("WebGl isn't available");
     }
 
-    for(var i = 0; i < 10; i++){
-      objectColl.push(new Cube(2,20,2));
-      objectColl[i].pos = [Math.floor(i/5)*10, 0, (i%5)*10]
+    for(var i = 0; i < 9; i++){
+      objectColl.push(new Cube(1,20,1));
+      objectColl[i].pos = [Math.floor(i/3)*10, 0, (i%3)*10]
     }
     //floatingCube = new Cube(1,1,1)
 
     camera = new Camera();
     camera.position[2] = -5;
+    camera.position[1] = 20;
     glContext.enable(glContext.DEPTH_TEST);
 
     //Set the viewport
     glContext.viewport(0, 0, browserCanvas.width, browserCanvas.height);
-    glContext.clearColor(0.0, 0.0, 0.0, 1.0);
+    glContext.clearColor(0.4, 0.4, 0.4, 1.0);
 
     //Load Shaders
     var program = initShaders(glContext,
@@ -103,6 +104,7 @@ var main = (function() {
 
   //Render the whole thing
   function render() {
+    resize();
     glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
 
     var ntime = Date.now() / 1000;
@@ -164,29 +166,48 @@ var main = (function() {
 
     //A
     if(keyboardState[65]){
-      camera.position = add(camera.position, scale(cameraSpeed*tDelta, camera.right));
+      camera.position = subtract(camera.position, scale(cameraSpeed*tDelta, camera.right));
 
     }
     //D
     if(keyboardState[68]){
-      camera.position = subtract(camera.position, scale(cameraSpeed*tDelta, camera.right));
+      camera.position = add(camera.position, scale(cameraSpeed*tDelta, camera.right));
     }
 
     //Q
     if(keyboardState[81]){
       if(true)
       {
-        camera.viewAngle[2] += camera.mouse.mouseSensitivity * camera.mouse.deltaX * tDelta;
+        camera.viewAngle[2] -= camera.mouse.mouseSensitivity * tDelta;
       }
     }
     //E
     if(keyboardState[69]){
       if(true)
       {
-        camera.viewAngle[2] -= camera.mouse.mouseSensitivity * camera.mouse.deltaX * tDelta ;
+        camera.viewAngle[2] += camera.mouse.mouseSensitivity * tDelta ;
       }
     }
   }
+
+  function resize() {
+	// Get the canvas from the WebGL context
+	var canvas = glContext.canvas;
+
+	// Lookup the size the browser is displaying the canvas.
+	var displayWidth = window.innerWidth;
+	var displayHeight = window.innerHeight;
+
+	// Check if the canvas is not the same size.
+	if (canvas.width != displayWidth || canvas.height != displayHeight) {
+		canvas.width = displayWidth;
+		canvas.height = displayHeight;
+		var ratio = displayWidth / displayHeight;
+		projectionMatrix = perspective(45, ratio, 0.1, 1000);
+		glContext.uniformMatrix4fv(projectionMatrixUniform,  false, flatten(projectionMatrix));
+		glContext.viewport(0, 0, canvas.width, canvas.height);
+	}
+}
 
   return {
     init: init
