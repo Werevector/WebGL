@@ -21,13 +21,15 @@ var keyboardStateX = new THREEx.KeyboardState();
 var time = 0;
 var tDelta;
 
+var objectColl = [];
+
 // var cPos = vec3(0,0,5);
 // var lookDir = vec3(0,0,-1);
 // var cLook = add(cPos, lookDir);
 // var cUp = vec3(0,1,0);
 
 var camera;
-var cameraSpeed = 50;
+var cameraSpeed = 10;
 
 var floatingCube;
 
@@ -48,21 +50,24 @@ var main = (function() {
       alert("WebGl isn't available");
     }
 
-    floatingCube = new Cube(1,1,1)
+    for(var i = 0; i < 10; i++){
+      objectColl.push(new Cube(2,20,2));
+      objectColl[i].pos = [Math.floor(i/5)*10, 0, (i%5)*10]
+    }
+    //floatingCube = new Cube(1,1,1)
 
     camera = new Camera();
     camera.position[2] = -5;
-
     glContext.enable(glContext.DEPTH_TEST);
 
     //Set the viewport
     glContext.viewport(0, 0, browserCanvas.width, browserCanvas.height);
-    glContext.clearColor(0.5, 0.5, 0.5, 1.0);
+    glContext.clearColor(0.0, 0.0, 0.0, 1.0);
 
     //Load Shaders
     var program = initShaders(glContext,
-      "Shaders/VertexShader.glsl",
-      "Shaders/FragmentShader.glsl"
+      "vertex-shader",
+      "fragment-shader"
     );
 
     //Initialize atrribute buffers
@@ -114,7 +119,11 @@ var main = (function() {
     //floatingCube.angles[0]++;
     //floatingCube.angles[2]++;
 
-    floatingCube.draw(vertexColor, vertexPosition);
+    for(var i = 0; i < objectColl.length; i++){
+      //objectColl[i].angles[0]++;
+      objectColl[i].draw(vertexColor, vertexPosition);
+    }
+    //floatingCube.draw(vertexColor, vertexPosition);
 
     requestAnimFrame(render);
   }
@@ -167,14 +176,14 @@ var main = (function() {
     if(keyboardState[81]){
       if(true)
       {
-        camera.viewAngle[2] += this.mouse.mouseSensitivity * this.mouse.deltaX * 1;
+        camera.viewAngle[2] += camera.mouse.mouseSensitivity * camera.mouse.deltaX * tDelta;
       }
     }
     //E
     if(keyboardState[69]){
       if(true)
       {
-        camera.viewAngle[2] -= this.mouse.mouseSensitivity * this.mouse.deltaX * 1;
+        camera.viewAngle[2] -= camera.mouse.mouseSensitivity * camera.mouse.deltaX * tDelta ;
       }
     }
   }
