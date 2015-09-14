@@ -18,13 +18,16 @@ var keyboardState = [];
 
 var keyboardStateX = new THREEx.KeyboardState();
 
+var time = 0;
+var tDelta;
+
 // var cPos = vec3(0,0,5);
 // var lookDir = vec3(0,0,-1);
 // var cLook = add(cPos, lookDir);
 // var cUp = vec3(0,1,0);
 
 var camera;
-var cameraSpeed = [3,3,3];
+var cameraSpeed = 50;
 
 var floatingCube;
 
@@ -65,6 +68,10 @@ var main = (function() {
     //Initialize atrribute buffers
     glContext.useProgram(program);
 
+    var ntime = Date.now() / 1000;
+	  tDelta = ntime - time;
+	  time = ntime;
+
     vertexColor = glContext.getAttribLocation(program, "vColor");
     vertexPosition = glContext.getAttribLocation(program, "vPosition");
 
@@ -75,7 +82,7 @@ var main = (function() {
     projectionMatrix = perspective(70, 1, 0.1, 1000);
 	  glContext.uniformMatrix4fv( projectionMatrixUniform,  false, flatten(projectionMatrix) );
 
-    viewMatrix = camera.getCameraView();
+    viewMatrix = camera.getCameraView(tDelta);
     glContext.uniformMatrix4fv(viewMatrixUniform, false, flatten(viewMatrix));
 
     window.onkeydown = function(e){
@@ -93,9 +100,14 @@ var main = (function() {
   function render() {
     glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
 
+    var ntime = Date.now() / 1000;
+    tDelta = ntime - time;
+    time = ntime;
+
     HandleKeyboardState();
 
-    viewMatrix = camera.getCameraView();
+
+    viewMatrix = camera.getCameraView(tDelta);
     glContext.uniformMatrix4fv(viewMatrixUniform, false, flatten(viewMatrix));
 
 
@@ -112,14 +124,16 @@ var main = (function() {
     if(keyboardState[87]){
       if(true)
       {
-        camera.position = add(camera.position, mult(camera.viewVector, cameraSpeed));
+        camera.position = add(camera.position, scale(cameraSpeed*tDelta, camera.viewVector));
+
       }
     }
     // S
     if(keyboardState[83]){
       if(true)
       {
-      camera.position = subtract(camera.position, mult(camera.viewVector, cameraSpeed));
+      camera.position = subtract(camera.position, scale(cameraSpeed*tDelta, camera.viewVector));
+
       }
     }
 
@@ -141,34 +155,28 @@ var main = (function() {
 
     //A
     if(keyboardState[65]){
-      camera.position = add(camera.position, mult(camera.right, cameraSpeed));
+      camera.position = add(camera.position, scale(cameraSpeed*tDelta, camera.right));
+
     }
     //D
     if(keyboardState[68]){
-      camera.position = subtract(camera.position, mult(camera.right, cameraSpeed));
+      camera.position = subtract(camera.position, scale(cameraSpeed*tDelta, camera.right));
     }
-    // //Q
-    // if(keyboardState[81]){
-    //   if(robotOuterRFinger.angles[2]<-10)
-    //   {
-    //     robotRightFinger.angles[2] -= robotSpeed/5;
-    //     robotLeftFinger.angles[2] += robotSpeed/5;
-    //
-    //     robotOuterRFinger.angles[2] += robotSpeed;
-    //     robotOuterLFinger.angles[2] -= robotSpeed;
-    //   }
-    // }
-    // //E
-    // if(keyboardState[69]){
-    //   if(robotOuterRFinger.angles[2]>-70)
-    //   {
-    //     robotRightFinger.angles[2] += robotSpeed/5;
-    //     robotLeftFinger.angles[2] -= robotSpeed/5;
-    //
-    //     robotOuterRFinger.angles[2] -= robotSpeed;
-    //     robotOuterLFinger.angles[2] += robotSpeed;
-    //   }
-    // }
+
+    //Q
+    if(keyboardState[81]){
+      if(true)
+      {
+        camera.viewAngle[2] += this.mouse.mouseSensitivity * this.mouse.deltaX * 1;
+      }
+    }
+    //E
+    if(keyboardState[69]){
+      if(true)
+      {
+        camera.viewAngle[2] -= this.mouse.mouseSensitivity * this.mouse.deltaX * 1;
+      }
+    }
   }
 
   return {

@@ -22,7 +22,7 @@ function Camera()
     deltaX: 0,
     deltaY: 0,
 
-    mouseSensitivity: 0.03,
+    mouseSensitivity: 3,
 
     // Have we used the deltaX and deltaY?
     consumedUpdate: false
@@ -33,10 +33,17 @@ function Camera()
   document.addEventListener('mousemove', CameraMouseMove.bind(this));
 }
 
-function ReturnCameraViewMatrix()
+function ReturnCameraViewMatrix(tDelta)
 {
-  this.updateAngle();
+  this.updateAngle(tDelta);
   //var tempRot = rotationMatrix(this.viewAngle);
+
+  // this.viewVector = vec3
+  // (
+  //   Math.cos(this.viewAngle[1]) * Math.sin(this.viewAngle[0]),
+  //   Math.sin(this.viewAngle[1]),
+  //   Math.cos(this.viewAngle[1]) * Math.cos(this.viewAngle[0])
+  // );
 
   this.viewVector = vec3
   (
@@ -44,6 +51,8 @@ function ReturnCameraViewMatrix()
     Math.sin(this.viewAngle[1]),
     Math.cos(this.viewAngle[1]) * Math.cos(this.viewAngle[0])
   );
+
+  this.viewVector[0] =
 
   this.right = vec3
   (
@@ -61,11 +70,11 @@ function ReturnCameraViewMatrix()
   //return lookAt(this.position, this.lookPos, this.upVector);
 }
 
-function CameraUpdateAngle()
+function CameraUpdateAngle(tDelta)
 {
   if (!this.mouse.consumedUpdate) {
-    this.viewAngle[0] += this.mouse.mouseSensitivity * this.mouse.deltaX;
-    this.viewAngle[1] += this.mouse.mouseSensitivity * this.mouse.deltaY;
+    this.viewAngle[0] += this.mouse.mouseSensitivity * this.mouse.deltaX * tDelta;
+    this.viewAngle[1] += this.mouse.mouseSensitivity * this.mouse.deltaY * tDelta;
     this.mouse.consumedUpdate = true;
   }
 }
