@@ -29,7 +29,7 @@ var objectColl = [];
 // var cUp = vec3(0,1,0);
 
 var camera;
-var cameraSpeed = 10;
+var cameraSpeed = 30;
 
 var floatingCube;
 
@@ -50,9 +50,29 @@ var main = (function() {
       alert("WebGl isn't available");
     }
 
-    for(var i = 0; i < 9; i++){
-      objectColl.push(new Cube(1,20,1));
-      objectColl[i].pos = [Math.floor(i/3)*10, 0, (i%3)*10]
+    for(var i = 0; i < 54; i++){
+      objectColl.push(new Cube(1, 20, 1));
+      objectColl[i].pos = [Math.floor(i/6)*10, 0, (i%6)*10]
+    }
+
+    for (var i = 0; i < 54; i++) {
+        objectColl.push(new Cube(20, 1, 1));
+        objectColl[54+i].pos = [Math.floor(i / 6) * 10, 15, (i % 6) * 10]
+    }
+
+    for (var i = 0; i < 54; i++) {
+        objectColl.push(new Cube(1, 1, 20));
+        objectColl[(54*2) + i].pos = [Math.floor(i / 6) * 10, 15, (i % 6) * 10]
+    }
+
+    for (var i = 0; i < 54; i++) {
+        objectColl.push(new Cube(1, 1, 20));
+        objectColl[(54 * 3) + i].pos = [Math.floor(i / 6) * 10, 5, (i % 6) * 10]
+    }
+
+    for (var i = 0; i < 54; i++) {
+        objectColl.push(new Cube(20, 1, 1));
+        objectColl[(54 * 4) + i].pos = [Math.floor(i / 6) * 10, 5, (i % 6) * 10]
     }
     //floatingCube = new Cube(1,1,1)
 
