@@ -1,4 +1,4 @@
-	
+
 
 
 function Camera()
@@ -25,7 +25,7 @@ function Camera()
     deltaX: 0,
     deltaY: 0,
 
-    mouseSensitivity: 20,
+    mouseSensitivity: 100,
 
     // Have we used the deltaX and deltaY?
     consumedUpdate: false
