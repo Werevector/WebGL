@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Assignment 3 Shading</title>
+  <style>
+  </style>
+</head>
+
+<body onload="main.init()">
+  <canvas id="gl-canvas">
+    Your browser doesn't support the HTML5 canvas element
+  </canvas>
+
+  <br/>
+
+  <script id="vertex-shader" type="x-shader/x-vertex">
+  attribute  vec4 vPosition;
+
+		uniform mat4 ModelViewProjection;
+		uniform mat4 WorldMatrix;
+
+		varying float factor;
+
+		void main()
+		{
+			factor = vPosition.x;
+			gl_Position = ModelViewProjection * WorldMatrix * vPosition;
+		}
+  </script>
+
+  <script id="fragment-shader" type="x-shader/x-fragment">
+  precision mediump float;
+
+  uniform vec4 Color;
+
+  varying float factor;
+
+  void main()
+  {
+    vec4 m = vec4(0.5,0.5,0.5,1.0);
+    gl_FragColor = Color*factor+m;
+  }
+
+  </script>
+
+
+  <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+  <script type="text/javascript" src="../Common/initShaders.js"></script>
+  <script type="text/javascript" src="../Common/MV.js"></script>
+
+  <script type="text/javascript" src="SceneGraph/geometryTools.js"></script>
+  <script type="text/javascript" src="SceneGraph/renderDrawable.js"></script>
+  <script type="text/javascript" src="SceneGraph/scenegraph.js"></script>
+  <script type="text/javascript" src="SceneGraph/sphereGeometry.js"></script>
+
+  <script type="text/javascript" src="SceneGraph/cubeGeometry.js"></script>
+  <script type="text/javascript" src="SceneGraph/cylinderGeometry.js"></script>
+
+  <script type="text/javascript" src="THREEx.KeyboardState.js"></script>
+  <script type="text/javascript" src="Camera.js"></script>
+  <script type="text/javascript" src="Main.js"></script>
+
+
+
+
+</body>
+
+</html>
