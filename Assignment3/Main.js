@@ -16,6 +16,7 @@ var cubeData;
 
 var scene = new SceneNode(null);
 var cubeNode;
+var cubeNode2;
 
 var projectionMat;
 var projectionMatLoc;
@@ -77,13 +78,14 @@ var main = (function() {
     gl.useProgram(program);
 
     // Create the buffers for the object
+    var cubeVBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, cubeVBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(cubeData.points), gl.STATIC_DRAW );
+
     var cubeNBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cubeNBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(cubeData.surfaceNormals), gl.STATIC_DRAW );
 
-    var cubeVBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, cubeVBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(cubeData.points), gl.STATIC_DRAW );
     //------------------------------------------------------------------------
 
     var ColorLocation = gl.getUniformLocation(program, "Color");
@@ -97,21 +99,37 @@ var main = (function() {
     var specularProductLoc  = gl.getUniformLocation(program, "specularProduct");
     var lightPositionLoc    = gl.getUniformLocation(program, "lightPosition");
     var shininessLoc        = gl.getUniformLocation(program, "shininess");
-    cubeNode = new SceneNode(scene);
 
-    cubeNode.addDrawable({
-      bufferInfo: {
+    cubeNode = new SceneNode(scene);
+    cubeNode.addDrawable(
+    {
+      bufferInfo:
+      {
         vBuffer: cubeVBuffer,
         nBuffer: cubeNBuffer,
-        numVertices: cubeData.numVertices
+        numVertices: 36
       },
       // Will be uploaded as uniforms
 
-      uniformInfo: new function(){
-        this.color = vec4(0, 1, 1, 1),
+      programInfo:
+      {
+        program: program,
+        worldMatLocation: WorldMatLocation,
+        colorLocation: ColorLocation,
+        ambientProduct: ambientProductLoc,
+        diffuseProduct: diffuseProductLoc,
+        specularProduct: specularProductLoc,
+        lightPosition: lightPositionLoc,
+        shininess: shininessLoc
+      },
 
-        this.lm_Vars = new function() {
-          this.lightPosition =  vec4(0.0, 0.0, 0.0, 0.0 );
+      uniformInfo:
+      {
+        color: vec4(0, 1, 1, 1),
+
+        lm_Vars: new function()
+        {
+          this.lightPosition =  vec4(0.0, 0.0, 1.0, 1.0 );
           this.lightAmbient =   vec4(0.2, 0.2, 0.2, 1.0 );
           this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
           this.lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
@@ -124,10 +142,25 @@ var main = (function() {
           this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
           this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
           this.specularProduct =  mult(this.lightSpecular, this.materialSpecular);
-        };
-      },
+        }
+      }
+    });
 
-      programInfo: {
+    cubeNode2 = new SceneNode(cubeNode);
+    cubeNode2.translate([2.0,0.0,0.0]);
+
+    cubeNode2.addDrawable(
+    {
+      bufferInfo:
+      {
+        vBuffer: cubeVBuffer,
+        nBuffer: cubeNBuffer,
+        numVertices: 36
+      },
+      // Will be uploaded as uniforms
+
+      programInfo:
+      {
         program: program,
         worldMatLocation: WorldMatLocation,
         colorLocation: ColorLocation,
@@ -136,31 +169,36 @@ var main = (function() {
         specularProduct: specularProductLoc,
         lightPosition: lightPositionLoc,
         shininess: shininessLoc
-      }
+      },
 
+      uniformInfo:
+      {
+        color: vec4(0, 1, 1, 1),
+
+        lm_Vars: new function()
+        {
+          this.lightPosition =  vec4(0.0, 0.0, 0.0, 1.0 );
+          this.lightAmbient =   vec4(0.2, 0.2, 0.2, 1.0 );
+          this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+
+          this.materialAmbient =    vec4( 1.0, 0.0, 1.0, 1.0 );
+          this.materialDiffuse =    vec4( 1.0, 0.8, 0.0, 1.0);
+          this.materialSpecular =   vec4( 1.0, 0.8, 0.0, 1.0 );
+          this.materialShininess =  100.0;
+
+          this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
+          this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
+          this.specularProduct =  mult(this.lightSpecular, this.materialSpecular);
+        }
+      }
     });
 
 
     //-------------------------------------------------
 
-    // Load Uniforms into shader program
-    // gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct"),
-    //    flatten(shCube.ambientProduct));
-    // gl.uniform4fv(gl.getUniformLocation(program, "diffuseProduct"),
-    //    flatten(shCube.diffuseProduct) );
-    // gl.uniform4fv(gl.getUniformLocation(program, "specularProduct"),
-    //    flatten(shCube.specularProduct) );
-    // gl.uniform4fv(gl.getUniformLocation(program, "lightPosition"),
-    //    flatten(shCube.lm_Vars.lightPosition) );
-
-    // gl.uniform1f(gl.getUniformLocation(program,
-    //    "shininess"),shCube.lm_Vars.materialShininess);
-
-    // modelMatLoc = gl.getUniformLocation(program, "modelMat");
     viewMatLoc = gl.getUniformLocation(program, "viewMat");
     projectionMatLoc = gl.getUniformLocation(program, "projectionMat");
-
-    // gl.uniformMatrix4fv(modelMatLoc, false, flatten(modelMat));
     gl.uniformMatrix4fv(projectionMatLoc,  false, flatten(projectionMat));
     gl.uniformMatrix4fv( viewMatLoc,  false, flatten(viewMat));
     //-------------------------------------------------------------------------
@@ -182,8 +220,12 @@ var main = (function() {
 
     var drawableObjects = SceneNode.getDrawableNodes();
 
-    // modelMat = mult(modelMat, rotate(2,[0,1,0] ) );
-    // gl.uniformMatrix4fv( modelMatLoc, false, flatten(modelMat));
+    cubeNode.rotateSelf(1, [0,1,0]);
+    cubeNode2.rotate(1, [0,1,0]);
+    cubeNode2.rotateSelf(2, [0,1,0]);
+
+
+    scene.updateMatrices();
 
     viewMat = camera.getCameraView(tDelta);
     gl.uniformMatrix4fv( viewMatLoc,  false, flatten(viewMat));

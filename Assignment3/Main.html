@@ -31,11 +31,11 @@
   void main()
   {
 
+    mat4 MV = projectionMat * viewMat;
     mat4 MVP = projectionMat * viewMat * WorldMatrix;
     vec3 pos = -(MVP * vPosition).xyz;
 
-    //fixed light postion
-
+    //fixed light position
     vec3 light = lightPosition.xyz;
     vec3 L = normalize( light - pos );
 
