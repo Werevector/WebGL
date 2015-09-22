@@ -51,8 +51,8 @@ var main = (function() {
 
 
     camera = new Camera();
-    camera.position[2] = -5;
-    camera.position[1] = 0;
+    camera.position[2] = -10;
+    camera.position[0] = 5;
 
     cubeData = new ShadedCube();
     sphereData = generateSphere(16,16);
@@ -143,7 +143,7 @@ var main = (function() {
           this.lightPosition =  vec4(0.0, 0.0, 1.0, 1.0 );
           this.lightAmbient =   vec4(0.2, 0.2, 0.2, 1.0 );
           this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
-          this.lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.lightSpecular =  vec4( 1.0, 1.0, 1.0, 1.0 );
 
           this.materialAmbient =    vec4( 1.0, 0.0, 1.0, 1.0 );
           this.materialDiffuse =    vec4( 1.0, 0.8, 0.0, 1.0);

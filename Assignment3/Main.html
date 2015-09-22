@@ -31,7 +31,6 @@
   void main()
   {
 
-    mat4 MV = projectionMat * viewMat;
     mat4 MVP = projectionMat * viewMat * WorldMatrix;
     vec3 pos = -(MVP * vPosition).xyz;
 
@@ -59,7 +58,7 @@
     vec4  specular = Ks * specularProduct;
 
     if( dot(L, N) < 0.0 ) {
-	     specular = vec4(0.0, 0.0, 0.0, 1.0);
+	     specular = vec4(0.0, 0.0, 0.0, 0.0);
     }
 
     gl_Position = MVP * vPosition;
