@@ -12,17 +12,15 @@ var tDelta;
 var camera;
 var cameraSpeed = 30;
 
-var shCube
+var cubeData;
+
+var scene = new SceneNode(null);
+var cubeNode;
 
 var projectionMat;
 var projectionMatLoc;
-
 var viewMat;
 var viewMatLoc;
-
-var modelMat = mat4();
-var modelMatLoc;
-var theta = 0;
 
 var main = (function() {
 
@@ -53,7 +51,8 @@ var main = (function() {
     camera.position[2] = -5;
     camera.position[1] = 0;
 
-    shCube = new ShadedCube();
+    cubeData = new ShadedCube();
+
 
     var ntime = Date.now() / 1000;
     tDelta = ntime - time;
@@ -77,42 +76,91 @@ var main = (function() {
     //Initialize atribute buffers
     gl.useProgram(program);
 
-    // Create and load the buffers for the single object
-    var nBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(shCube.surfaceNormals), gl.STATIC_DRAW );
+    // Create the buffers for the object
+    var cubeNBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, cubeNBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(cubeData.surfaceNormals), gl.STATIC_DRAW );
 
-    var vNormal = gl.getAttribLocation( program, "vNormal" );
-    gl.vertexAttribPointer( vNormal, 3, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vNormal );
+    var cubeVBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, cubeVBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(cubeData.points), gl.STATIC_DRAW );
+    //------------------------------------------------------------------------
 
-    var vBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(shCube.points), gl.STATIC_DRAW );
+    var ColorLocation = gl.getUniformLocation(program, "Color");
+    var WorldMatLocation = gl.getUniformLocation(program, "WorldMatrix");
 
-    var vPosition = gl.getAttribLocation(program, "vPosition");
-    gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vPosition);
-    //-------------------------------------------------
-
-    // Load Uniforms into shader program
-    gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct"),
-       flatten(shCube.ambientProduct));
-    gl.uniform4fv(gl.getUniformLocation(program, "diffuseProduct"),
-       flatten(shCube.diffuseProduct) );
-    gl.uniform4fv(gl.getUniformLocation(program, "specularProduct"),
-       flatten(shCube.specularProduct) );
-    gl.uniform4fv(gl.getUniformLocation(program, "lightPosition"),
-       flatten(shCube.lm_Vars.lightPosition) );
-
-    gl.uniform1f(gl.getUniformLocation(program,
-       "shininess"),shCube.lm_Vars.materialShininess);
-
-    modelMatLoc = gl.getUniformLocation(program, "modelMat");
     viewMatLoc = gl.getUniformLocation(program, "viewMat");
     projectionMatLoc = gl.getUniformLocation(program, "projectionMat");
 
-    gl.uniformMatrix4fv(modelMatLoc, false, flatten(modelMat));
+    var ambientProductLoc   = gl.getUniformLocation(program, "ambientProduct");
+    var diffuseProductLoc   = gl.getUniformLocation(program, "diffuseProduct");
+    var specularProductLoc  = gl.getUniformLocation(program, "specularProduct");
+    var lightPositionLoc    = gl.getUniformLocation(program, "lightPosition");
+    var shininessLoc        = gl.getUniformLocation(program, "shininess");
+    cubeNode = new SceneNode(scene);
+
+    cubeNode.addDrawable({
+      bufferInfo: {
+        vBuffer: cubeVBuffer,
+        nBuffer: cubeNBuffer,
+        numVertices: cubeData.numVertices
+      },
+      // Will be uploaded as uniforms
+
+      uniformInfo: new function(){
+        this.color = vec4(0, 1, 1, 1),
+
+        this.lm_Vars = new function() {
+          this.lightPosition =  vec4(0.0, 0.0, 0.0, 0.0 );
+          this.lightAmbient =   vec4(0.2, 0.2, 0.2, 1.0 );
+          this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+
+          this.materialAmbient =    vec4( 1.0, 0.0, 1.0, 1.0 );
+          this.materialDiffuse =    vec4( 1.0, 0.8, 0.0, 1.0);
+          this.materialSpecular =   vec4( 1.0, 0.8, 0.0, 1.0 );
+          this.materialShininess =  100.0;
+
+          this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
+          this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
+          this.specularProduct =  mult(this.lightSpecular, this.materialSpecular);
+        };
+      },
+
+      programInfo: {
+        program: program,
+        worldMatLocation: WorldMatLocation,
+        colorLocation: ColorLocation,
+        ambientProduct: ambientProductLoc,
+        diffuseProduct: diffuseProductLoc,
+        specularProduct: specularProductLoc,
+        lightPosition: lightPositionLoc,
+        shininess: shininessLoc
+      }
+
+    });
+
+
+    //-------------------------------------------------
+
+    // Load Uniforms into shader program
+    // gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct"),
+    //    flatten(shCube.ambientProduct));
+    // gl.uniform4fv(gl.getUniformLocation(program, "diffuseProduct"),
+    //    flatten(shCube.diffuseProduct) );
+    // gl.uniform4fv(gl.getUniformLocation(program, "specularProduct"),
+    //    flatten(shCube.specularProduct) );
+    // gl.uniform4fv(gl.getUniformLocation(program, "lightPosition"),
+    //    flatten(shCube.lm_Vars.lightPosition) );
+
+    // gl.uniform1f(gl.getUniformLocation(program,
+    //    "shininess"),shCube.lm_Vars.materialShininess);
+
+    // modelMatLoc = gl.getUniformLocation(program, "modelMat");
+    viewMatLoc = gl.getUniformLocation(program, "viewMat");
+    projectionMatLoc = gl.getUniformLocation(program, "projectionMat");
+
+    // gl.uniformMatrix4fv(modelMatLoc, false, flatten(modelMat));
     gl.uniformMatrix4fv(projectionMatLoc,  false, flatten(projectionMat));
     gl.uniformMatrix4fv( viewMatLoc,  false, flatten(viewMat));
     //-------------------------------------------------------------------------
@@ -131,18 +179,18 @@ var main = (function() {
     tDelta = ntime - time;
     time = ntime;
     //---------------
-    theta++;
 
-    modelMat = mult(modelMat, rotate(2,[0,1,0] ) );
-    gl.uniformMatrix4fv( modelMatLoc, false, flatten(modelMat));
+    var drawableObjects = SceneNode.getDrawableNodes();
+
+    // modelMat = mult(modelMat, rotate(2,[0,1,0] ) );
+    // gl.uniformMatrix4fv( modelMatLoc, false, flatten(modelMat));
 
     viewMat = camera.getCameraView(tDelta);
     gl.uniformMatrix4fv( viewMatLoc,  false, flatten(viewMat));
 
-
-
-    var test = length(shCube.points);
-    gl.drawArrays(gl.TRIANGLES, 0, 36);
+    drawableObjects.forEach(function(object) {
+      renderDrawable(object); // Render a drawable.
+    });
 
     requestAnimFrame(render);
   }

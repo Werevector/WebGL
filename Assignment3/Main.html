@@ -20,8 +20,10 @@
   attribute  vec3 vNormal;
   varying vec4 fColor;
 
+  uniform mat4 ModelViewProjection;
+  uniform mat4 WorldMatrix;
+
   uniform vec4 ambientProduct, diffuseProduct, specularProduct;
-  uniform mat4 modelMat;
   uniform mat4 viewMat;
   uniform mat4 projectionMat;
   uniform vec4 lightPosition;
@@ -29,7 +31,7 @@
   void main()
   {
 
-    mat4 MVP = projectionMat * viewMat * modelMat;
+    mat4 MVP = projectionMat * viewMat * WorldMatrix;
     vec3 pos = -(MVP * vPosition).xyz;
 
     //fixed light postion
@@ -71,6 +73,7 @@
   <script id="fragment-shader" type="x-shader/x-fragment">
   precision mediump float;
 
+  uniform vec4 Color;
 
   varying vec4 fColor;
 
@@ -92,6 +95,9 @@
   <script type="text/javascript" src="Shapes/cubeGeometry.js"></script>
   <script type="text/javascript" src="Shapes/cylinderGeometry.js"></script>
   <script type="text/javascript" src="Shapes/ShadedCube.js"></script>
+
+  <script type="text/javascript" src="SceneGraph/renderDrawable.js"></script>
+  <script type="text/javascript" src="SceneGraph/scenegraph.js"></script>
 
   <script type="text/javascript" src="THREEx.KeyboardState.js"></script>
   <script type="text/javascript" src="Camera.js"></script>

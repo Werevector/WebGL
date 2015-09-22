@@ -7,24 +7,25 @@ function ShadedCube() {
   this.points = [];
   this.colors = [];
   this.surfaceNormals = [];
+  this.numVertices = 36;
 
 
-  this.lm_Vars = {
-    lightPosition: vec4(0.0, 0.0, 0.0, 0.0 ),
-    lightAmbient: vec4(0.2, 0.2, 0.2, 1.0 ),
-    lightDiffuse: vec4( 1.0, 1.0, 1.0, 1.0 ),
-    lightSpecular: vec4( 1.0, 1.0, 1.0, 1.0 ),
+  // this.lm_Vars = {
+  //   lightPosition: vec4(0.0, 0.0, 0.0, 0.0 ),
+  //   lightAmbient: vec4(0.2, 0.2, 0.2, 1.0 ),
+  //   lightDiffuse: vec4( 1.0, 1.0, 1.0, 1.0 ),
+  //   lightSpecular: vec4( 1.0, 1.0, 1.0, 1.0 ),
+  //
+  //   materialAmbient: vec4( 1.0, 0.0, 1.0, 1.0 ),
+  //   materialDiffuse: vec4( 1.0, 0.8, 0.0, 1.0),
+  //   materialSpecular: vec4( 1.0, 0.8, 0.0, 1.0 ),
+  //   materialShininess: 100.0
+  // };
 
-    materialAmbient: vec4( 1.0, 0.0, 1.0, 1.0 ),
-    materialDiffuse: vec4( 1.0, 0.8, 0.0, 1.0),
-    materialSpecular: vec4( 1.0, 0.8, 0.0, 1.0 ),
-    materialShininess: 100.0
-  };
 
-
-  this.ambientProduct = mult(this.lm_Vars.lightAmbient, this.lm_Vars.materialAmbient);
-  this.diffuseProduct = mult(this.lm_Vars.lightDiffuse, this.lm_Vars.materialDiffuse);
-  this.specularProduct = mult(this.lm_Vars.lightSpecular, this.lm_Vars.materialSpecular);
+  // this.ambientProduct = mult(this.lm_Vars.lightAmbient, this.lm_Vars.materialAmbient);
+  // this.diffuseProduct = mult(this.lm_Vars.lightDiffuse, this.lm_Vars.materialDiffuse);
+  // this.specularProduct = mult(this.lm_Vars.lightSpecular, this.lm_Vars.materialSpecular);
 
 
   //
