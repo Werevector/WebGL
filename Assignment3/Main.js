@@ -55,7 +55,7 @@ var main = (function() {
     camera.position[0] = 5;
 
     cubeData = new ShadedCube();
-    sphereData = generateSphere(16,16);
+    sphereData = generateSphere(64,64);
 
 
     var ntime = Date.now() / 1000;
@@ -136,8 +136,6 @@ var main = (function() {
 
       uniformInfo:
       {
-        color: vec4(0, 1, 1, 1),
-
         lm_Vars: new function()
         {
           this.lightPosition =  vec4(0.0, 0.0, 0.0, 0.0 );
@@ -184,8 +182,6 @@ var main = (function() {
 
       uniformInfo:
       {
-        color: vec4(0, 1, 1, 1),
-
         lm_Vars: new function()
         {
           this.lightPosition =  vec4(0.0, 0.0, 0.0, 0.0 );
@@ -194,8 +190,8 @@ var main = (function() {
           this.lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
           this.materialAmbient =    vec4( 1.0, 0.0, 1.0, 1.0 );
-          this.materialDiffuse =    vec4( 1.0, 0.8, 0.0, 1.0);
-          this.materialSpecular =   vec4( 1.0, 0.8, 0.0, 1.0 );
+          this.materialDiffuse =    vec4( 0.0, 1.0, 1.0, 1.0);
+          this.materialSpecular =   vec4( 0.0, 0.5, 1.0, 1.0 );
           this.materialShininess =  100.0;
 
           this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
@@ -232,8 +228,6 @@ var main = (function() {
 
       uniformInfo:
       {
-        color: vec4(0, 1, 1, 1),
-
         lm_Vars: new function()
         {
           this.lightPosition =  vec4(0.0, 0.0, 0.0, 0.0 );
@@ -241,8 +235,8 @@ var main = (function() {
           this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
           this.lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
-          this.materialAmbient =    vec4( 1.0, 0.0, 1.0, 1.0 );
-          this.materialDiffuse =    vec4( 1.0, 0.8, 0.0, 1.0);
+          this.materialAmbient =    vec4( 1.0, 0.0, 0.0, 1.0 );
+          this.materialDiffuse =    vec4( 0.0, 0.5, 0.0, 1.0);
           this.materialSpecular =   vec4( 1.0, 0.0, 0.0, 1.0 );
           this.materialShininess =  100.0;
 
@@ -281,8 +275,9 @@ var main = (function() {
 
     cubeNode.rotateSelf(1, [0,1,0]);
     cubeNode2.rotate(1, [0,1,0]);
-    cubeNode2.rotateSelf(2, [0,1,0]);
+    cubeNode2.rotateSelf(2, [1,0,0]);
     sphereNode.rotateSelf(1, [0,1,0]);
+    sphereNode.rotate(1, [1,1,0]);
 
 
     scene.updateMatrices();

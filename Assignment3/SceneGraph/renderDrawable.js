@@ -5,21 +5,22 @@
 var renderDrawable = function(drawable) {
     gl.useProgram(drawable.drawInfo.programInfo.program);
 
+    gl.bindBuffer(gl.ARRAY_BUFFER, drawable.drawInfo.bufferInfo.vBuffer);
+
+	  var vPosition = gl.getAttribLocation(drawable.drawInfo.programInfo.program, "vPosition");
+    gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
+   	gl.enableVertexAttribArray(vPosition);
+
     gl.bindBuffer(gl.ARRAY_BUFFER, drawable.drawInfo.bufferInfo.nBuffer);
 
     var vNormal = gl.getAttribLocation(drawable.drawInfo.programInfo.program, "vNormal");
     gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
    	gl.enableVertexAttribArray(vNormal);
 
-	  gl.bindBuffer(gl.ARRAY_BUFFER, drawable.drawInfo.bufferInfo.vBuffer);
-
-	  var vPosition = gl.getAttribLocation(drawable.drawInfo.programInfo.program, "vPosition");
-    gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
-   	gl.enableVertexAttribArray(vPosition);
 
     //gl.uniformMatrix4fv(drawable.drawInfo.programInfo.worldMatLocation, false, flatten(drawable.worldMatrix));
     gl.uniformMatrix4fv(drawable.drawInfo.programInfo.worldMatLocation, false, flatten(drawable.worldMatrix));
-    gl.uniform4fv(drawable.drawInfo.programInfo.colorLocation, new Float32Array(drawable.drawInfo.uniformInfo.color));
+    //gl.uniform4fv(drawable.drawInfo.programInfo.colorLocation, new Float32Array(drawable.drawInfo.uniformInfo.color));
 
     //console.log(drawable.drawInfo.uniformInfo.lm_Vars.lightPosition);
 
@@ -27,7 +28,7 @@ var renderDrawable = function(drawable) {
     gl.uniform4fv(drawable.drawInfo.programInfo.diffuseProduct,   flatten(drawable.drawInfo.uniformInfo.lm_Vars.diffuseProduct));
     gl.uniform4fv(drawable.drawInfo.programInfo.specularProduct,  flatten(drawable.drawInfo.uniformInfo.lm_Vars.specularProduct));
     gl.uniform4fv(drawable.drawInfo.programInfo.lightPosition,    flatten(drawable.drawInfo.uniformInfo.lm_Vars.lightPosition));
-    gl.uniform1f(drawable.drawInfo.programInfo.shininess,        flatten(drawable.drawInfo.uniformInfo.lm_Vars.materialShininess));
+    gl.uniform1f(drawable.drawInfo.programInfo.shininess,         drawable.drawInfo.uniformInfo.lm_Vars.materialShininess);
 
     gl.drawArrays(gl.TRIANGLES, 0, drawable.drawInfo.bufferInfo.numVertices);
 }
