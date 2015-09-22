@@ -6,10 +6,11 @@ function ShadedCube() {
 
   this.points = [];
   this.colors = [];
+  this.surfaceNormals = [];
 
 
   this.lm_Vars = {
-    lightPosition: vec4(1.0, 1.0, 1.0, 0.0 ),
+    lightPosition: vec4(0.0, 0.0, 0.0, 0.0 ),
     lightAmbient: vec4(0.2, 0.2, 0.2, 1.0 ),
     lightDiffuse: vec4( 1.0, 1.0, 1.0, 1.0 ),
     lightSpecular: vec4( 1.0, 1.0, 1.0, 1.0 ),
@@ -20,17 +21,24 @@ function ShadedCube() {
     materialShininess: 100.0
   };
 
-  var lightPosition = vec4(1.0, 1.0, 1.0, 0.0 );
-  var lightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
-  var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
-  var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
-  var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
-  var materialDiffuse = vec4( 1.0, 0.8, 0.0, 1.0);
-  var materialSpecular = vec4( 1.0, 0.8, 0.0, 1.0 );
-  var materialShininess = 100.0;
+  this.ambientProduct = mult(this.lm_Vars.lightAmbient, this.lm_Vars.materialAmbient);
+  this.diffuseProduct = mult(this.lm_Vars.lightDiffuse, this.lm_Vars.materialDiffuse);
+  this.specularProduct = mult(this.lm_Vars.lightSpecular, this.lm_Vars.materialSpecular);
 
-  var ambientColor, diffuseColor, specularColor;
+
+  //
+  // var lightPosition = vec4(1.0, 1.0, 1.0, 0.0 );
+  // var lightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
+  // var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
+  // var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+  //
+  // var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
+  // var materialDiffuse = vec4( 1.0, 0.8, 0.0, 1.0);
+  // var materialSpecular = vec4( 1.0, 0.8, 0.0, 1.0 );
+  // var materialShininess = 100.0;
+  //
+  // var ambientColor, diffuseColor, specularColor;
 
 
   var vertices = [
@@ -70,28 +78,56 @@ function ShadedCube() {
 
   //vertex color assigned by the index of the vertex
 
-  for (var f = 0; f < faces.length; ++f) {
-    var a = faces[f][0];
-    var b = faces[f][1];
-    var c = faces[f][2];
-    var d = faces[f][3];
+  // for (var f = 0; f < faces.length; ++f) {
+  //   var a = faces[f][0];
+  //   var b = faces[f][1];
+  //   var c = faces[f][2];
+  //   var d = faces[f][3];
+  //
+  //   var indices = [a, b, c, a, c, d];
+  //
+  //   for (var i = 0; i < indices.length; ++i) {
+  //     this.points.push(vertices[indices[i]]);
+  //     //colors.push( vertexColors[indices[i]] );
+  //
+  //     // for solid colored faces use
+  //     this.colors.push(vertexColors[a]);
+  //   }
+  // }
 
-    var indices = [a, b, c, a, c, d];
 
-    for (var i = 0; i < indices.length; ++i) {
-      this.points.push(vertices[indices[i]]);
-      //colors.push( vertexColors[indices[i]] );
+  this.quad = function(a, b, c, d){
 
-      // for solid colored faces use
-      this.colors.push(vertexColors[a]);
-    }
+     var t1 = subtract(vertices[b], vertices[a]);
+     var t2 = subtract(vertices[c], vertices[b]);
+     var normal = cross(t1, t2);
+     var normal = vec3(normal);
+
+
+     this.points.push(vertices[a]);
+     this.surfaceNormals.push(normal);
+     this.points.push(vertices[b]);
+     this.surfaceNormals.push(normal);
+     this.points.push(vertices[c]);
+     this.surfaceNormals.push(normal);
+     this.points.push(vertices[a]);
+     this.surfaceNormals.push(normal);
+     this.points.push(vertices[c]);
+     this.surfaceNormals.push(normal);
+     this.points.push(vertices[d]);
+     this.surfaceNormals.push(normal);
   }
 
-  this.surfaceNormals = generateSurfaceNormals(this.points);
+  this.quad( 1, 0, 3, 2 );
+  this.quad( 2, 3, 7, 6 );
+  this.quad( 3, 0, 4, 7 );
+  this.quad( 6, 5, 1, 2 );
+  this.quad( 4, 5, 6, 7 );
+  this.quad( 5, 4, 0, 1 );
 
-  this.ambientProduct = mult(this.lm_Vars.lightAmbient, this.lm_Vars.materialAmbient);
-  this.diffuseProduct = mult(this.lm_Vars.lightDiffuse, this.lm_Vars.materialDiffuse);
-  this.specularProduct = mult(this.lm_Vars.lightSpecular, this.lm_Vars.materialSpecular);
 
+
+
+  //this.surfaceNormals = generateSurfaceNormals(this.points);
 
 }

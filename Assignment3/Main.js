@@ -22,6 +22,7 @@ var viewMatLoc;
 
 var modelMat = mat4();
 var modelMatLoc;
+var theta = 0;
 
 var main = (function() {
 
@@ -107,13 +108,11 @@ var main = (function() {
     gl.uniform1f(gl.getUniformLocation(program,
        "shininess"),shCube.lm_Vars.materialShininess);
 
-    gl.uniformMatrix4fv( gl.getUniformLocation(program, "projectionMat"),
-       false, flatten(projectionMat));
-
     modelMatLoc = gl.getUniformLocation(program, "modelMat");
     viewMatLoc = gl.getUniformLocation(program, "viewMat");
     projectionMatLoc = gl.getUniformLocation(program, "projectionMat");
 
+    gl.uniformMatrix4fv(modelMatLoc, false, flatten(modelMat));
     gl.uniformMatrix4fv(projectionMatLoc,  false, flatten(projectionMat));
     gl.uniformMatrix4fv( viewMatLoc,  false, flatten(viewMat));
     //-------------------------------------------------------------------------
@@ -132,12 +131,18 @@ var main = (function() {
     tDelta = ntime - time;
     time = ntime;
     //---------------
+    theta++;
 
+    modelMat = mult(modelMat, rotate(2,[0,1,0] ) );
+    gl.uniformMatrix4fv( modelMatLoc, false, flatten(modelMat));
 
     viewMat = camera.getCameraView(tDelta);
     gl.uniformMatrix4fv( viewMatLoc,  false, flatten(viewMat));
 
-    gl.drawArrays(gl.TRIANGLES, 0, length(shCube.points));
+
+
+    var test = length(shCube.points);
+    gl.drawArrays(gl.TRIANGLES, 0, 36);
 
     requestAnimFrame(render);
   }
