@@ -12,7 +12,8 @@ var tDelta;
 var camera;
 var cameraSpeed = 30;
 
-var shCube
+var shCube;
+var shSphere;
 
 var projectionMat;
 var projectionMatLoc;
@@ -54,6 +55,7 @@ var main = (function() {
     camera.position[1] = 0;
 
     shCube = new ShadedCube();
+    shSphere = generateSphere(16,16);
 
     var ntime = Date.now() / 1000;
     tDelta = ntime - time;
@@ -77,10 +79,24 @@ var main = (function() {
     //Initialize atribute buffers
     gl.useProgram(program);
 
+    var lightPosition = vec4(0.0, 0.0, 0.0, 0.0 );
+    var lightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
+    var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
+    var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+
+    var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
+    var materialDiffuse = vec4( 1.0, 0.8, 0.0, 1.0);
+    var materialSpecular = vec4( 1.0, 0.8, 0.0, 1.0 );
+    var materialShininess = 100.0;
+
+    var ambientProduct = mult(lightAmbient, materialAmbient);
+    var diffuseProduct = mult(lightDiffuse, materialDiffuse);
+    var specularProduct = mult(lightSpecular, materialSpecular);
+
     // Create and load the buffers for the single object
     var nBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(shCube.surfaceNormals), gl.STATIC_DRAW );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(shSphere.normals), gl.STATIC_DRAW );
 
     var vNormal = gl.getAttribLocation( program, "vNormal" );
     gl.vertexAttribPointer( vNormal, 3, gl.FLOAT, false, 0, 0 );
@@ -88,7 +104,7 @@ var main = (function() {
 
     var vBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(shCube.points), gl.STATIC_DRAW );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(shSphere.points), gl.STATIC_DRAW );
 
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
@@ -97,16 +113,16 @@ var main = (function() {
 
     // Load Uniforms into shader program
     gl.uniform4fv(gl.getUniformLocation(program, "ambientProduct"),
-       flatten(shCube.ambientProduct));
+       flatten(ambientProduct));
     gl.uniform4fv(gl.getUniformLocation(program, "diffuseProduct"),
-       flatten(shCube.diffuseProduct) );
+       flatten(diffuseProduct) );
     gl.uniform4fv(gl.getUniformLocation(program, "specularProduct"),
-       flatten(shCube.specularProduct) );
+       flatten(specularProduct) );
     gl.uniform4fv(gl.getUniformLocation(program, "lightPosition"),
-       flatten(shCube.lm_Vars.lightPosition) );
+       flatten(lightPosition) );
 
     gl.uniform1f(gl.getUniformLocation(program,
-       "shininess"),shCube.lm_Vars.materialShininess);
+       "shininess"),materialShininess);
 
     modelMatLoc = gl.getUniformLocation(program, "modelMat");
     viewMatLoc = gl.getUniformLocation(program, "viewMat");
@@ -141,8 +157,8 @@ var main = (function() {
 
 
 
-    var test = length(shCube.points);
-    gl.drawArrays(gl.TRIANGLES, 0, 36);
+    var test = length(shSphere.points);
+    gl.drawArrays(gl.TRIANGLES, 0, shSphere.numVertices);
 
     requestAnimFrame(render);
   }
