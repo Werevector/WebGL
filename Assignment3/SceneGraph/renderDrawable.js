@@ -17,7 +17,8 @@ var renderDrawable = function(drawable) {
     gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
    	gl.enableVertexAttribArray(vPosition);
 
-    gl.uniformMatrix4fv(drawable.drawInfo.programInfo.worldMatLocation, false, flatten(drawable.worldMatrix));      // Pass the world matrix of the current object to the shader.
+    //gl.uniformMatrix4fv(drawable.drawInfo.programInfo.worldMatLocation, false, flatten(drawable.worldMatrix));
+    gl.uniformMatrix4fv(drawable.drawInfo.programInfo.worldMatLocation, false, flatten(drawable.worldMatrix));
     gl.uniform4fv(drawable.drawInfo.programInfo.colorLocation, new Float32Array(drawable.drawInfo.uniformInfo.color));
 
     //console.log(drawable.drawInfo.uniformInfo.lm_Vars.lightPosition);

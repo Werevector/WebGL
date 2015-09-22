@@ -140,7 +140,7 @@ var main = (function() {
 
         lm_Vars: new function()
         {
-          this.lightPosition =  vec4(0.0, 0.0, 1.0, 1.0 );
+          this.lightPosition =  vec4(0.0, 0.0, 0.0, 0.0 );
           this.lightAmbient =   vec4(0.2, 0.2, 0.2, 1.0 );
           this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
           this.lightSpecular =  vec4( 1.0, 1.0, 1.0, 1.0 );
@@ -188,7 +188,7 @@ var main = (function() {
 
         lm_Vars: new function()
         {
-          this.lightPosition =  vec4(0.0, 0.0, 0.0, 1.0 );
+          this.lightPosition =  vec4(0.0, 0.0, 0.0, 0.0 );
           this.lightAmbient =   vec4(0.2, 0.2, 0.2, 1.0 );
           this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
           this.lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
@@ -236,7 +236,7 @@ var main = (function() {
 
         lm_Vars: new function()
         {
-          this.lightPosition =  vec4(0.0, 0.0, 0.0, 1.0 );
+          this.lightPosition =  vec4(0.0, 0.0, 0.0, 0.0 );
           this.lightAmbient =   vec4(0.2, 0.2, 0.2, 1.0 );
           this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
           this.lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );

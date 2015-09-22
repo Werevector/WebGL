@@ -20,7 +20,6 @@
   attribute  vec3 vNormal;
   varying vec4 fColor;
 
-  uniform mat4 ModelViewProjection;
   uniform mat4 WorldMatrix;
 
   uniform vec4 ambientProduct, diffuseProduct, specularProduct;
@@ -58,7 +57,7 @@
     vec4  specular = Ks * specularProduct;
 
     if( dot(L, N) < 0.0 ) {
-	     specular = vec4(0.0, 0.0, 0.0, 0.0);
+	     specular = vec4(0.0, 0.0, 0.0, 1.0);
     }
 
     gl_Position = MVP * vPosition;
@@ -71,9 +70,6 @@
 
   <script id="fragment-shader" type="x-shader/x-fragment">
   precision mediump float;
-
-  uniform vec4 Color;
-
   varying vec4 fColor;
 
   void
