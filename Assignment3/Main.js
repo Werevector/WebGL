@@ -16,9 +16,9 @@ var cubeData;
 var sphereData;
 
 var scene = new SceneNode(null);
-var cubeNode;
-var cubeNode2;
-var sphereNode;
+var BronzeNode;
+var GoldNode;
+var SilverNode;
 
 var projectionMat;
 var projectionMatLoc;
@@ -111,14 +111,14 @@ var main = (function() {
     var lightPositionLoc    = gl.getUniformLocation(program, "lightPosition");
     var shininessLoc        = gl.getUniformLocation(program, "shininess");
 
-    cubeNode = new SceneNode(scene);
-    cubeNode.addDrawable(
+    BronzeNode = new SceneNode(scene);
+    BronzeNode.addDrawable(
     {
       bufferInfo:
       {
-        vBuffer: cubeVBuffer,
-        nBuffer: cubeNBuffer,
-        numVertices: 36
+        vBuffer: sphereVBuffer,
+        nBuffer: sphereNBuffer,
+        numVertices:sphereData.numVertices
       },
       // Will be uploaded as uniforms
 
@@ -143,10 +143,10 @@ var main = (function() {
           this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
           this.lightSpecular =  vec4( 1.0, 1.0, 1.0, 1.0 );
 
-          this.materialAmbient =    vec4( 1.0, 0.0, 1.0, 1.0 );
-          this.materialDiffuse =    vec4( 1.0, 0.8, 0.0, 1.0);
-          this.materialSpecular =   vec4( 1.0, 0.8, 0.0, 1.0 );
-          this.materialShininess =  100.0;
+          this.materialAmbient =    vec4( 0.2125, 0.1275, 0.054, 1.0 );
+          this.materialDiffuse =    vec4( 0.714, 0.4284, 0.18144, 1.0);
+          this.materialSpecular =   vec4( 0.393548, 0.271906, 0.166721, 1.0 );
+          this.materialShininess =  25.60;
 
           this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
           this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
@@ -155,16 +155,16 @@ var main = (function() {
       }
     });
 
-    cubeNode2 = new SceneNode(cubeNode);
-    cubeNode2.translate([2.0,0.0,0.0]);
+    SilverNode = new SceneNode(BronzeNode);
+    SilverNode.translate([5.0,0.0,0.0]);
 
-    cubeNode2.addDrawable(
+    SilverNode.addDrawable(
     {
       bufferInfo:
       {
-        vBuffer: cubeVBuffer,
-        nBuffer: cubeNBuffer,
-        numVertices: 36
+        vBuffer: sphereVBuffer,
+        nBuffer: sphereNBuffer,
+        numVertices:sphereData.numVertices
       },
       // Will be uploaded as uniforms
 
@@ -189,10 +189,10 @@ var main = (function() {
           this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
           this.lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
-          this.materialAmbient =    vec4( 1.0, 0.0, 1.0, 1.0 );
-          this.materialDiffuse =    vec4( 0.0, 1.0, 1.0, 1.0);
-          this.materialSpecular =   vec4( 0.0, 0.5, 1.0, 1.0 );
-          this.materialShininess =  100.0;
+          this.materialAmbient =    vec4( 0.23125, 0.23125, 0.23125, 1.0 );
+          this.materialDiffuse =    vec4( 0.2775, 0.2775, 0.2775, 1.0);
+          this.materialSpecular =   vec4( 0.773911, 0.773911, 0.773911, 1.0 );
+          this.materialShininess =  89.6;
 
           this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
           this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
@@ -201,10 +201,11 @@ var main = (function() {
       }
     });
 
-    sphereNode = new SceneNode(cubeNode);
-    sphereNode.translate([5.0,0.0,0.0]);
+    GoldNode = new SceneNode(BronzeNode);
+    GoldNode.translate([15.0,0.0,0.0]);
+    GoldNode.scale([0.5,0.5,0.5]);
 
-    sphereNode.addDrawable(
+    GoldNode.addDrawable(
     {
       bufferInfo:
       {
@@ -235,10 +236,10 @@ var main = (function() {
           this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
           this.lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
-          this.materialAmbient =    vec4( 1.0, 0.0, 0.0, 1.0 );
-          this.materialDiffuse =    vec4( 0.0, 0.5, 0.0, 1.0);
-          this.materialSpecular =   vec4( 1.0, 0.0, 0.0, 1.0 );
-          this.materialShininess =  100.0;
+          this.materialAmbient =    vec4( 0.24725, 0.1995, 0.0745, 1.0 );
+          this.materialDiffuse =    vec4( 0.75164, 0.60648, 0.22648, 1.0);
+          this.materialSpecular =   vec4( 0.6282281, 0.555802, 0.366065, 1.0 );
+          this.materialShininess =  51.2;
 
           this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
           this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
@@ -273,11 +274,11 @@ var main = (function() {
 
     var drawableObjects = SceneNode.getDrawableNodes();
 
-    cubeNode.rotateSelf(1, [0,1,0]);
-    cubeNode2.rotate(1, [0,1,0]);
-    cubeNode2.rotateSelf(2, [1,0,0]);
-    sphereNode.rotateSelf(1, [0,1,0]);
-    sphereNode.rotate(1, [1,1,0]);
+    BronzeNode.rotateSelf(1, [0,1,0]);
+    SilverNode.rotate(1, [0,1,0]);
+    SilverNode.rotateSelf(2, [1,0,0]);
+    GoldNode.rotateSelf(1, [0,1,0]);
+    GoldNode.rotate(1, [1,1,0]);
 
 
     scene.updateMatrices();
@@ -346,6 +347,7 @@ var main = (function() {
       canvas.height = displayHeight;
       var ratio = displayWidth / displayHeight;
       projectionMat = perspective(70, ratio, 0.1, 1000);
+      gl.uniformMatrix4fv(projectionMatLoc,  false, flatten(projectionMat));
       gl.viewport(0, 0, canvas.width, canvas.height);
     }
   }
