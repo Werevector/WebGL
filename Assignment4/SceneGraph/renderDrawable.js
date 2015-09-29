@@ -38,7 +38,9 @@ var renderDrawable = function(drawable) {
     gl.uniform4fv(drawable.drawInfo.programInfo.lightPosition,    flatten(drawable.drawInfo.uniformInfo.lm_Vars.lightPosition));
     gl.uniform1f(drawable.drawInfo.programInfo.shininess,         drawable.drawInfo.uniformInfo.lm_Vars.materialShininess);
 
-    gl.uniform1i(gl.getUniformLocation(drawable.drawInfo.programInfo.program, "texture"), 0);
+    gl.uniform1i(drawable.drawInfo.programInfo.textureloc, drawable.drawInfo.textureUnit);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, textures[drawable.drawInfo.textureUnit]);
 
 
     gl.drawArrays(gl.TRIANGLES, 0, drawable.drawInfo.bufferInfo.numVertices);

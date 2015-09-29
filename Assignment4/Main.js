@@ -20,15 +20,14 @@ var sphereData;
 var scene = new SceneNode(null);
 var cubeNode;
 var marsNode;
+var moonNode;
 
 var projectionMat;
 var projectionMatLoc;
 var viewMat;
 var viewMatLoc;
 
-var earthTexture;
-var marsTexture;
-
+var textures = [];
 var textureLoc;
 
 var main = (function() {
@@ -87,11 +86,19 @@ var main = (function() {
     // var image = document.getElementById("texImage");
     // initTexture(image);
 
-    var image = new Image();
-    image.crossOrigin = "";
-    image.onload = function() { initTexture(image); }
-    image.src = "earth3.gif";
+    loadImages(
+      [
+        "earth.jpg",
+        "mar0kuu2.jpg",
+        "pluto.jpg"
+      ],
+      initTextures
+    );
 
+    textureLoc = gl.getUniformLocation
+      (
+        program, "texture"
+      );
 
 
     // Create the buffers for the object
@@ -158,7 +165,8 @@ var main = (function() {
         diffuseProduct: diffuseProductLoc,
         specularProduct: specularProductLoc,
         lightPosition: lightPositionLoc,
-        shininess: shininessLoc
+        shininess: shininessLoc,
+        textureloc: textureLoc
       },
 
       uniformInfo:
@@ -179,11 +187,12 @@ var main = (function() {
           this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
           this.specularProduct =  mult(this.lightSpecular, this.materialSpecular);
         }
-      }
+      },
+      textureUnit: 0
     });
 
     marsNode = new SceneNode(cubeNode);
-    marsNode.translate([5.0,0.0,0.0]);
+    marsNode.translate([8.0,0.0,0.0]);
     marsNode.scale([0.9,0.9,0.9]);
     marsNode.addDrawable(
     {
@@ -206,7 +215,8 @@ var main = (function() {
         diffuseProduct: diffuseProductLoc,
         specularProduct: specularProductLoc,
         lightPosition: lightPositionLoc,
-        shininess: shininessLoc
+        shininess: shininessLoc,
+        textureloc: textureLoc
       },
 
       uniformInfo:
@@ -227,9 +237,59 @@ var main = (function() {
           this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
           this.specularProduct =  mult(this.lightSpecular, this.materialSpecular);
         }
-      }
+      },
+      textureUnit: 1
     });
 
+    moonNode = new SceneNode(marsNode);
+    moonNode.translate([5.0,0.0,0.0]);
+    moonNode.scale([0.3,0.3,0.3]);
+    moonNode.addDrawable(
+    {
+      bufferInfo:
+      {
+        vBuffer: sphereVBuffer,
+        nBuffer: sphereNBuffer,
+        tBuffer: sphereTBuffer,
+        //iBuffer: sphereIBuffer,
+        numVertices: sphereData.numVertices
+      },
+      // Will be uploaded as uniforms
+
+      programInfo:
+      {
+        program: program,
+        worldMatLocation: WorldMatLocation,
+        colorLocation: ColorLocation,
+        ambientProduct: ambientProductLoc,
+        diffuseProduct: diffuseProductLoc,
+        specularProduct: specularProductLoc,
+        lightPosition: lightPositionLoc,
+        shininess: shininessLoc,
+        textureloc: textureLoc
+      },
+
+      uniformInfo:
+      {
+        lm_Vars: new function()
+        {
+          this.lightPosition =  vec4(0.0, 0.0, 0.0, 0.0 );
+          this.lightAmbient =   vec4(0.2, 0.2, 0.2, 1.0 );
+          this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.lightSpecular =  vec4( 1.0, 1.0, 1.0, 1.0 );
+
+          this.materialAmbient =    vec4( 0.5, 0.5, 0.5, 1.0 );
+          this.materialDiffuse =    vec4( 0.7, 0.7, 0.7, 1.0);
+          this.materialSpecular =   vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.materialShininess =  100.60;
+
+          this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
+          this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
+          this.specularProduct =  mult(this.lightSpecular, this.materialSpecular);
+        }
+      },
+      textureUnit: 2
+    });
 
     //-------------------------------------------------
 
@@ -259,6 +319,9 @@ var main = (function() {
     cubeNode.rotateSelf(1, [0,1,0]);
     marsNode.rotate(1,[0,1,0]);
     marsNode.rotateSelf(1,[0,1,0]);
+
+    moonNode.rotate(1,[0,1,0]);
+    moonNode.rotateSelf(1,[0,1,0]);
 
     scene.updateMatrices();
 
@@ -312,6 +375,63 @@ var main = (function() {
     }
   }
 
+  function loadImage(url, callback){
+    var image = new Image();
+    image.crossOrigin = "";
+    image.src = url;
+    image.onload = callback;
+    return image;
+  }
+
+  function loadImages(urls, callback){
+    var images = [];
+    var imagesToLoad = urls.length;
+
+    var onImageLoad = function() {
+       --imagesToLoad;
+       // If all the images are loaded call the callback.
+      if (imagesToLoad == 0) {
+         callback(images);
+      }
+    };
+
+    for (var ii = 0; ii < imagesToLoad; ++ii) {
+       var image = loadImage(urls[ii], onImageLoad);
+       images.push(image);
+    }
+  }
+
+  function initTextures(images){
+    for (var ii = 0; ii < images.length; ++ii) {
+      var texture = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+
+      // Set the parameters so we can render any size image.
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+      // Upload the image into the texture.
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images[ii]);
+
+      // add the texture to the array of textures.
+      textures.push(texture);
+    }
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, textures[0]);
+
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, textures[1]);
+    //
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, textures[2]);
+    //
+    // gl.activeTexture(gl.TEXTURE3);
+    // gl.bindTexture(gl.TEXTURE_2D, textures[3]);
+
+  }
+
   function resize() {
     // Get the canvas from the WebGL context
     var canvas = gl.canvas;
@@ -331,17 +451,17 @@ var main = (function() {
     }
   }
 
-  function initTexture(image){
-    texture = gl.createTexture();
-    gl.bindTexture( gl.TEXTURE_2D, texture );
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image );
-    gl.generateMipmap( gl.TEXTURE_2D );
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  }
+  // function initTexture(image){
+  //   texture = gl.createTexture();
+  //   gl.bindTexture( gl.TEXTURE_2D, texture );
+  //   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  //   gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image );
+  //   gl.generateMipmap( gl.TEXTURE_2D );
+  //   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  //   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  //   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  //   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  // }
 
   return {
     init: init
