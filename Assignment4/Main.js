@@ -181,7 +181,7 @@ var main = (function() {
           this.materialAmbient =    vec4( 0.5, 0.5, 0.5, 1.0 );
           this.materialDiffuse =    vec4( 0.7, 0.7, 0.7, 1.0);
           this.materialSpecular =   vec4( 1.0, 1.0, 1.0, 1.0 );
-          this.materialShininess =  100.60;
+          this.materialShininess =  20;
 
           this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
           this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
@@ -231,7 +231,7 @@ var main = (function() {
           this.materialAmbient =    vec4( 0.5, 0.5, 0.5, 1.0 );
           this.materialDiffuse =    vec4( 0.7, 0.7, 0.7, 1.0);
           this.materialSpecular =   vec4( 1.0, 1.0, 1.0, 1.0 );
-          this.materialShininess =  100.60;
+          this.materialShininess =  20;
 
           this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
           this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
@@ -281,7 +281,7 @@ var main = (function() {
           this.materialAmbient =    vec4( 0.5, 0.5, 0.5, 1.0 );
           this.materialDiffuse =    vec4( 0.7, 0.7, 0.7, 1.0);
           this.materialSpecular =   vec4( 1.0, 1.0, 1.0, 1.0 );
-          this.materialShininess =  100.60;
+          this.materialShininess =  20;
 
           this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
           this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
