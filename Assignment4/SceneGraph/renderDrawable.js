@@ -23,6 +23,7 @@ var renderDrawable = function(drawable) {
     gl.vertexAttribPointer( vTexCoord, 2, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vTexCoord );
 
+  //  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, drawable.drawInfo.bufferInfo.iBuffer);
 
 
     //gl.uniformMatrix4fv(drawable.drawInfo.programInfo.worldMatLocation, false, flatten(drawable.worldMatrix));
@@ -41,4 +42,5 @@ var renderDrawable = function(drawable) {
 
 
     gl.drawArrays(gl.TRIANGLES, 0, drawable.drawInfo.bufferInfo.numVertices);
+    //gl.drawElements(gl.TRIANGLES, 3 , gl.UNSIGNED_SHORT, 0);
 }

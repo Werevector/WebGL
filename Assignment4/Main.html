@@ -25,6 +25,7 @@
   varying vec2 fTexCoord;
   varying vec4 fColor;
 
+  varying float s, t;
 
   uniform mat4 WorldMatrix;
 
@@ -66,6 +67,13 @@
 	     specular = vec4(0.0, 0.0, 0.0, 1.0);
     }
 
+    float pi = acos(0.0);
+
+    s= 0.5*acos(vPosition.x)/pi;
+
+    t = 0.5*asin(vPosition.y/sqrt(1.0-vPosition.x*vPosition.x))/pi;
+
+
     gl_Position = MVP * vPosition;
     fColor = ambient + diffuse +specular;
 
@@ -79,6 +87,7 @@
   precision mediump float;
   varying vec4 fColor;
   varying vec2 fTexCoord;
+  varying float s, t;
 
   uniform sampler2D texture;
 
@@ -87,6 +96,8 @@
   {
       //gl_FragColor = fColor;
       gl_FragColor = fColor * texture2D(texture, fTexCoord);
+      //gl_FragColor = texture2D(texture, fTexCoord);
+      //gl_FragColor = fColor * texture2D( texture, vec2(s, t));
   }
   </script>
 
@@ -101,6 +112,7 @@
   <script type="text/javascript" src="Shapes/cubeGeometry.js"></script>
   <script type="text/javascript" src="Shapes/cylinderGeometry.js"></script>
   <script type="text/javascript" src="Shapes/ShadedCube.js"></script>
+  <script type="text/javascript" src="Shapes/mySphere.js"></script>
 
   <script type="text/javascript" src="SceneGraph/renderDrawable.js"></script>
   <script type="text/javascript" src="SceneGraph/scenegraph.js"></script>

@@ -19,13 +19,16 @@ var sphereData;
 
 var scene = new SceneNode(null);
 var cubeNode;
+var marsNode;
 
 var projectionMat;
 var projectionMatLoc;
 var viewMat;
 var viewMatLoc;
 
-var texture;
+var earthTexture;
+var marsTexture;
+
 var textureLoc;
 
 var main = (function() {
@@ -56,7 +59,7 @@ var main = (function() {
     camera.position[0] = 5;
 
     cubeData = new ShadedCube();
-    sphereData = generateSphere(64,64);
+    sphereData = generateSphere(128,128);
 
 
     var ntime = Date.now() / 1000;
@@ -87,8 +90,8 @@ var main = (function() {
     var image = new Image();
     image.crossOrigin = "";
     image.onload = function() { initTexture(image); }
-    image.src = "SA2011_black.gif";
-    //image.setAttribute('crossorigin', 'anonymous');
+    image.src = "earth3.gif";
+
 
 
     // Create the buffers for the object
@@ -103,7 +106,23 @@ var main = (function() {
     var cubeTBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cubeTBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(cubeData.texCoords), gl.STATIC_DRAW );
-    //------------------------------------------------------------------------
+
+    var sphereVBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, sphereVBuffer);
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(sphereData.points), gl.STATIC_DRAW );
+
+    var sphereNBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, sphereNBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(sphereData.normals), gl.STATIC_DRAW );
+
+    var sphereTBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphereTBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(sphereData.texCoords), gl.STATIC_DRAW );
+
+    // var sphereIBuffer = gl.createBuffer();
+    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphereIBuffer);
+    // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(sphereData.indexData), gl.STATIC_DRAW );
+    // //------------------------------------------------------------------------
 
     var ColorLocation = gl.getUniformLocation(program, "Color");
     var WorldMatLocation = gl.getUniformLocation(program, "WorldMatrix");
@@ -122,10 +141,11 @@ var main = (function() {
     {
       bufferInfo:
       {
-        vBuffer: cubeVBuffer,
-        nBuffer: cubeNBuffer,
-        tBuffer: cubeTBuffer,
-        numVertices: cubeData.numVertices
+        vBuffer: sphereVBuffer,
+        nBuffer: sphereNBuffer,
+        tBuffer: sphereTBuffer,
+        //iBuffer: sphereIBuffer,
+        numVertices: sphereData.numVertices
       },
       // Will be uploaded as uniforms
 
@@ -150,10 +170,10 @@ var main = (function() {
           this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
           this.lightSpecular =  vec4( 1.0, 1.0, 1.0, 1.0 );
 
-          this.materialAmbient =    vec4( 0.2125, 0.1275, 0.054, 1.0 );
-          this.materialDiffuse =    vec4( 0.714, 1, 0.18144, 1.0);
-          this.materialSpecular =   vec4( 0.393548, 0.271906, 0.166721, 1.0 );
-          this.materialShininess =  25.60;
+          this.materialAmbient =    vec4( 0.5, 0.5, 0.5, 1.0 );
+          this.materialDiffuse =    vec4( 0.7, 0.7, 0.7, 1.0);
+          this.materialSpecular =   vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.materialShininess =  100.60;
 
           this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
           this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
@@ -162,6 +182,53 @@ var main = (function() {
       }
     });
 
+    marsNode = new SceneNode(cubeNode);
+    marsNode.translate([5.0,0.0,0.0]);
+    marsNode.scale([0.9,0.9,0.9]);
+    marsNode.addDrawable(
+    {
+      bufferInfo:
+      {
+        vBuffer: sphereVBuffer,
+        nBuffer: sphereNBuffer,
+        tBuffer: sphereTBuffer,
+        //iBuffer: sphereIBuffer,
+        numVertices: sphereData.numVertices
+      },
+      // Will be uploaded as uniforms
+
+      programInfo:
+      {
+        program: program,
+        worldMatLocation: WorldMatLocation,
+        colorLocation: ColorLocation,
+        ambientProduct: ambientProductLoc,
+        diffuseProduct: diffuseProductLoc,
+        specularProduct: specularProductLoc,
+        lightPosition: lightPositionLoc,
+        shininess: shininessLoc
+      },
+
+      uniformInfo:
+      {
+        lm_Vars: new function()
+        {
+          this.lightPosition =  vec4(0.0, 0.0, 0.0, 0.0 );
+          this.lightAmbient =   vec4(0.2, 0.2, 0.2, 1.0 );
+          this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.lightSpecular =  vec4( 1.0, 1.0, 1.0, 1.0 );
+
+          this.materialAmbient =    vec4( 0.5, 0.5, 0.5, 1.0 );
+          this.materialDiffuse =    vec4( 0.7, 0.7, 0.7, 1.0);
+          this.materialSpecular =   vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.materialShininess =  100.60;
+
+          this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
+          this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
+          this.specularProduct =  mult(this.lightSpecular, this.materialSpecular);
+        }
+      }
+    });
 
 
     //-------------------------------------------------
@@ -190,6 +257,8 @@ var main = (function() {
     var drawableObjects = SceneNode.getDrawableNodes();
 
     cubeNode.rotateSelf(1, [0,1,0]);
+    marsNode.rotate(1,[0,1,0]);
+    marsNode.rotateSelf(1,[0,1,0]);
 
     scene.updateMatrices();
 
@@ -268,10 +337,10 @@ var main = (function() {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image );
     gl.generateMipmap( gl.TEXTURE_2D );
-    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR );
-    gl.texParameteri( gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T,gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   }
 
   return {
