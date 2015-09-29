@@ -11,11 +11,36 @@ var renderDrawable = function(drawable) {
   var uniformInfo = drawable.drawInfo.uniformInfo;
 
   gl.useProgram(programInfo.program);
-  gl.bindBuffer(gl.ARRAY_BUFFER, bufferInfo.buffer);
-  gl.vertexAttribPointer(attributeLocations.vPosition, 4, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(attributeLocations.vPosition);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufferInfo.vBuffer);
+
+  var vPosition = gl.getAttribLocation(programInfo.program, "vPosition");
+  gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
+ 	gl.enableVertexAttribArray(vPosition);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufferInfo.nBuffer);
+
+  var vNormal = gl.getAttribLocation(programInfo.program, "vNormal");
+  gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
+ 	gl.enableVertexAttribArray(vNormal);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, bufferInfo.tBuffer);
+
+  var vTexCoord = gl.getAttribLocation( programInfo.program, "vTexCoord" );
+  gl.vertexAttribPointer( vTexCoord, 2, gl.FLOAT, false, 0, 0 );
+  gl.enableVertexAttribArray( vTexCoord );
+
 
   gl.uniformMatrix4fv(uniformLocations.worldMatrix, false, flatten(drawable._worldMatrix)); // Pass the world matrix of the current object to the shader.
-  gl.uniform4fv(uniformLocations.color, new Float32Array(uniformInfo.color));
+
+  gl.uniform4fv(uniformLocations.ambientProdLocation,   flatten(uniformInfo.lm_Vars.ambientProduct));
+  gl.uniform4fv(uniformLocations.diffuseProdLocation,   flatten(uniformInfo.lm_Vars.diffuseProduct));
+  gl.uniform4fv(uniformLocations.specularProdLocation,  flatten(uniformInfo.lm_Vars.specularProduct));
+  gl.uniform4fv(uniformLocations.light,                 flatten(uniformInfo.lm_Vars.lightPosition));
+  gl.uniform1f(uniformLocations.shininess,    uniformInfo.lm_Vars.materialShininess);
+
+  gl.uniform1i(uniformLocations.texture, uniformInfo.texture);
+
+
   gl.drawArrays(gl.TRIANGLES, 0, bufferInfo.numVertices);
 };

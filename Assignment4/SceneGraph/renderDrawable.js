@@ -41,6 +41,7 @@ var renderDrawable = function(drawable) {
     gl.uniform1i(drawable.drawInfo.programInfo.textureloc, drawable.drawInfo.textureUnit);
 
 
+
     gl.drawArrays(gl.TRIANGLES, 0, drawable.drawInfo.bufferInfo.numVertices);
     //gl.drawElements(gl.TRIANGLES, 3 , gl.UNSIGNED_SHORT, 0);
 }

@@ -1,24 +1,20 @@
 "use strict"
 
 var gl;
-
 var keyboardState = [];
-
 var keyboardStateX = new THREEx.KeyboardState();
-
 var time = 0;
 var tDelta;
-
 var camera;
 var cameraSpeed = 30;
-
 var program;
-
 var cubeData;
 var sphereData;
 
 var scene = new SceneNode(null);
-var cubeNode;
+var orbitNode;
+var sunNode;
+var earthNode;
 var marsNode;
 var moonNode;
 
@@ -27,7 +23,6 @@ var viewMat;
 
 var sphereBuffer;
 var cubeBuffer;
-
 
 var textures = [];
 
@@ -43,12 +38,12 @@ var ColorLocation;
 var WorldMatLocation;
 var NormalMatLocation;
 var TextureLocation;
-var UsingLightLocation;
 var LightLocation;
 
-var AmbientLocation;
-var DiffuseLocation;
-var SpecularLocation;
+var AmbientProdLocation;
+var DiffuseProdLocation;
+var SpecularProdLocation;
+var ShineLocation;
 
 var vPositionLocation;
 var vNormalLocation;
@@ -60,6 +55,10 @@ var main = (function() {
 
   function init() {
 
+    //Loading canvas from the HTML Element
+    browserCanvas = document.getElementById("gl-canvas");
+    browserCanvas.width = 600;
+    browserCanvas.height = 600;
 
     //Create the OpenGL context, to be used in the program
     gl = WebGLUtils.setupWebGL(browserCanvas);
@@ -91,14 +90,16 @@ var main = (function() {
 
     loadImages(
       [
-        "earth.jpg",
-        "mars.jpg",
-        "pluto.jpg"
+        "images/earth.jpg",
+        "images/mars.jpg",
+        "images/pluto.jpg",
+        "images/sun.jpg"
       ],
       initTextures
     );
 
-
+    initUniforms();
+    initObjects();
 
     render();
   }
@@ -115,52 +116,22 @@ var main = (function() {
     time = ntime;
     //---------------
 
+    var drawableObjects = SceneNode.getDrawableNodes();
+
+    scene.updateMatrices();
+    earthNode.rotate([0,1,0]);
 
     viewMat = camera.getCameraView(tDelta);
     gl.uniformMatrix4fv( viewMatLoc,  false, flatten(viewMat));
 
+    drawableObjects.forEach(function(object) {
+      renderDrawable(object); // Render a drawable.
+    });
+
+
     requestAnimFrame(render);
   }
 
-  function HandleKeyboardState() {
-    // W
-    if (keyboardState[87]) {
-      if (true) {
-        camera.position = add(camera.position, scale(cameraSpeed * tDelta, camera.viewVector));
-
-      }
-    }
-    // S
-    if (keyboardState[83]) {
-      if (true) {
-        camera.position = subtract(camera.position, scale(cameraSpeed * tDelta, camera.viewVector));
-
-      }
-    }
-
-    //A
-    if (keyboardState[65]) {
-      camera.position = subtract(camera.position, scale(cameraSpeed * tDelta, camera.right));
-
-    }
-    //D
-    if (keyboardState[68]) {
-      camera.position = add(camera.position, scale(cameraSpeed * tDelta, camera.right));
-    }
-
-    //Q
-    if (keyboardState[81]) {
-      if (true) {
-        camera.viewAngle[2] -= camera.mouse.mouseSensitivity * tDelta;
-      }
-    }
-    //E
-    if (keyboardState[69]) {
-      if (true) {
-        camera.viewAngle[2] += camera.mouse.mouseSensitivity * tDelta;
-      }
-    }
-  }
 
   function loadImage(url, callback){
     var image = new Image();
@@ -189,10 +160,6 @@ var main = (function() {
   }
 
   function initObjects(){
-    //Loading canvas from the HTML Element
-    browserCanvas = document.getElementById("gl-canvas");
-    browserCanvas.width = 600;
-    browserCanvas.height = 600;
 
     //Set the viewport
     gl.viewport(0, 0, browserCanvas.width, browserCanvas.height);
@@ -202,40 +169,99 @@ var main = (function() {
     camera.position[2] = -10;
     camera.position[0] = 5;
 
-    cubeData = new ShadedCube();
+    cubeData = new generateCube();
     sphereData = generateSphere(128,128);
+
+    sunNode = new SceneNode(scene);
+    earthNode = new SceneNode(sunNode);
+    earthNode.translate([5.0,0.0,0.0]);
+    earthNode.scale([0.5,0.5,0.5]);
+
+
+    initBuffers();
 
     projectionMat = perspective(70, browserCanvas.width / browserCanvas.height, 0.01, 1000);
     viewMat = camera.getCameraView(tDelta);
 
     programInfo = {
-        program: program,
-        attributeLocations: {
-            vPosition: vPositionLocation,
-            vNormal: vNormalLocation,
-            vTexCoord: vTexCoordLocation
-        },
-        uniformLocations: {
-          // Uniforms set once during lifetime?
-          projectionMatrix: ProjectionMatLocation,
-          light: LightLocation,
+      program: program,
+      attributeLocations: {
+          vPosition: vPositionLocation,
+          vNormal: vNormalLocation,
+          vTexCoord: vTexCoordLocation
+      },
+      uniformLocations: {
+        // Uniforms set once during lifetime?
+        light: LightLocation,
 
-          // Set once per per program
-          viewMatrix: ViewMatLocation,
+        // Uniforms set every draw call
+        worldMatrix: WorldMatLocation,
+        normalMatrix: NormalMatLocation,
+        texture: TextureLocation,
+        color: ColorLocation,
+        shininess: ShineLocation,
 
-          // Uniforms set every draw call
-          worldMatrix: WorldMatLocation,
-          normalMatrix: NormalMatLocation,
-          texture: TextureLocation,
-          color: ColorLocation,
-          usingLight: UsingLightLocation,
-
-          // Materials
-          ambientLocation: AmbientLocation,
-          diffuseLocation: DiffuseLocation,
-          specularLocation: SpecularLocation
-        }
+        // Materials
+        ambientProdLocation: AmbientProdLocation,
+        diffuseProdLocation: DiffuseProdLocation,
+        specularProdLocation: SpecularProdLocation
+      }
     };
+
+    sunNode.addDrawable({
+    	bufferInfo: sphereBufferInfo,
+      programInfo: programInfo,
+      // Will be uploaded as uniforms
+      uniformInfo: {
+        color: vec4(0, 1, 1, 1),
+        texture: 3,
+
+        lm_Vars: new function()
+        {
+          this.lightPosition =  vec4(0.0, 0.0, 0.0, 0.0 );
+          this.lightAmbient =   vec4(0.8, 0.8, 0.8, 0.8 );
+          this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.lightSpecular =  vec4( 1.0, 1.0, 1.0, 1.0 );
+
+          this.materialAmbient =    vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.materialDiffuse =    vec4( 1.0, 1.0, 1.0, 1.0);
+          this.materialSpecular =   vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.materialShininess =  100;
+
+          this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
+          this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
+          this.specularProduct =  mult(this.lightSpecular, this.materialSpecular);
+        }
+      }
+    });
+
+    earthNode.addDrawable({
+    	bufferInfo: sphereBufferInfo,
+      programInfo: programInfo,
+      // Will be uploaded as uniforms
+      uniformInfo: {
+        color: vec4(0, 1, 1, 1),
+        texture: 0,
+
+        lm_Vars: new function()
+        {
+          this.lightPosition =  vec4(0.0, 0.0, 0.0, 0.0 );
+          this.lightAmbient =   vec4(0.2, 0.2, 0.2, 1.0 );
+          this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.lightSpecular =  vec4( 1.0, 1.0, 1.0, 1.0 );
+
+          this.materialAmbient =    vec4( 0.5, 0.5, 0.5, 1.0 );
+          this.materialDiffuse =    vec4( 0.7, 0.7, 0.7, 1.0);
+          this.materialSpecular =   vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.materialShininess =  20;
+
+          this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
+          this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
+          this.specularProduct =  mult(this.lightSpecular, this.materialSpecular);
+        }
+      }
+    });
+
 
     //-------------------------------------------------------------------------
     gl.uniformMatrix4fv(projectionMatLoc,  false, flatten(projectionMat));
@@ -250,7 +276,7 @@ var main = (function() {
     viewMatLoc = gl.getUniformLocation(program, "viewMat");
     projectionMatLoc = gl.getUniformLocation(program, "projectionMat");
 
-    textureLoc = gl.getUniformLocation
+    TextureLocation = gl.getUniformLocation
     (
       program, "texture"
     );
@@ -258,13 +284,12 @@ var main = (function() {
     ColorLocation = gl.getUniformLocation(program, "Color");
     WorldMatLocation = gl.getUniformLocation(program, "WorldMatrix");
     NormalMatLocation = gl.getUniformLocation(program, "NormalMatrix");
-    TextureLocation = gl.getUniformLocation(program, "texture");
-    UsingLightLocation = gl.getUniformLocation(program, "usingLight");
     LightLocation = gl.getUniformLocation(program, "light");
+    ShineLocation = gl.getUniformLocation(program, "shininess");
 
-    AmbientLocation = gl.getUniformLocation(program, "ambient");
-    DiffuseLocation = gl.getUniformLocation(program, "diffuse");
-    SpecularLocation = gl.getUniformLocation(program, "specular");
+    AmbientProdLocation = gl.getUniformLocation(program, "ambientProduct");
+    DiffuseProdLocation = gl.getUniformLocation(program, "diffuseProduct");
+    SpecularProdLocation = gl.getUniformLocation(program, "specularProduct");
 
     // Get all relevant attribute locations
     vPositionLocation = gl.getAttribLocation(program, "vPosition");
@@ -275,12 +300,23 @@ var main = (function() {
   function initBuffers(){
 
     // Create the buffers for the object
-    sphereBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, sphereBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(flatten([].concat(sphereData.points, sphereData.normals, sphereData.texCoords))), gl.STATIC_DRAW);
+    var sphereVBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, sphereVBuffer);
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(sphereData.points), gl.STATIC_DRAW );
+
+    var sphereNBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, sphereNBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(sphereData.normals), gl.STATIC_DRAW );
+
+    var sphereTBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphereTBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(sphereData.texCoords), gl.STATIC_DRAW );
+
 
     sphereBufferInfo = {
-      buffer: sphereBuffer,
+      vBuffer: sphereVBuffer,
+      nBuffer: sphereNBuffer,
+      tBuffer: sphereTBuffer,
       numVertices: sphereData.numVertices
     };
 
@@ -321,6 +357,9 @@ var main = (function() {
 
     gl.activeTexture(gl.TEXTURE2);
     gl.bindTexture(gl.TEXTURE_2D, textures[2]);
+
+    gl.activeTexture(gl.TEXTURE3);
+    gl.bindTexture(gl.TEXTURE_2D, textures[3]);
   }
 
   function resize() {
@@ -339,6 +378,46 @@ var main = (function() {
       projectionMat = perspective(70, ratio, 0.1, 1000);
       gl.uniformMatrix4fv(projectionMatLoc,  false, flatten(projectionMat));
       gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  function HandleKeyboardState() {
+    // W
+    if (keyboardState[87]) {
+      if (true) {
+        camera.position = add(camera.position, scale(cameraSpeed * tDelta, camera.viewVector));
+
+      }
+    }
+    // S
+    if (keyboardState[83]) {
+      if (true) {
+        camera.position = subtract(camera.position, scale(cameraSpeed * tDelta, camera.viewVector));
+
+      }
+    }
+
+    //A
+    if (keyboardState[65]) {
+      camera.position = subtract(camera.position, scale(cameraSpeed * tDelta, camera.right));
+
+    }
+    //D
+    if (keyboardState[68]) {
+      camera.position = add(camera.position, scale(cameraSpeed * tDelta, camera.right));
+    }
+
+    //Q
+    if (keyboardState[81]) {
+      if (true) {
+        camera.viewAngle[2] -= camera.mouse.mouseSensitivity * tDelta;
+      }
+    }
+    //E
+    if (keyboardState[69]) {
+      if (true) {
+        camera.viewAngle[2] += camera.mouse.mouseSensitivity * tDelta;
+      }
     }
   }
 

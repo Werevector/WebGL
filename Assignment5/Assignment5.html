@@ -23,8 +23,6 @@
   varying vec2 fTexCoord;
   varying vec4 fColor;
 
-  varying float s, t;
-
   uniform mat4 WorldMatrix;
 
   uniform vec4 ambientProduct, diffuseProduct, specularProduct;
@@ -65,13 +63,6 @@
 	     specular = vec4(0.0, 0.0, 0.0, 1.0);
     }
 
-    float pi = acos(0.0);
-
-    s= 0.5*acos(vPosition.x)/pi;
-
-    t = 0.5*asin(vPosition.y/sqrt(1.0-vPosition.x*vPosition.x))/pi;
-
-
     gl_Position = MVP * vPosition;
     fColor = ambient + diffuse +specular;
 
@@ -85,7 +76,6 @@
   precision mediump float;
   varying vec4 fColor;
   varying vec2 fTexCoord;
-  varying float s, t;
 
   uniform sampler2D texture;
 
@@ -100,9 +90,9 @@
   </script>
 
 
-  <script type="text/javascript" src="../Common/webgl-utils.js"></script>
-  <script type="text/javascript" src="../Common/initShaders.js"></script>
-  <script type="text/javascript" src="../Common/MV.js"></script>
+  <script type="text/javascript" src="common/webgl-utils.js"></script>
+  <script type="text/javascript" src="common/initShaders.js"></script>
+  <script type="text/javascript" src="common/MV.js"></script>
 
   <script type="text/javascript" src="shapes/geometryTools.js"></script>
   <script type="text/javascript" src="shapes/sphereGeometry.js"></script>
@@ -110,8 +100,8 @@
   <script type="text/javascript" src="shapes/cubeGeometry.js"></script>
   <script type="text/javascript" src="shapes/cylinderGeometry.js"></script>
 
-  <script type="text/javascript" src="sceneGraph/renderDrawable.js"></script>
-  <script type="text/javascript" src="sceneGraph/scenegraph.js"></script>
+  <script type="text/javascript" src="renderDrawable.js"></script>
+  <script type="text/javascript" src="scenegraph.js"></script>
 
   <script type="text/javascript" src="THREEx.KeyboardState.js"></script>
   <script type="text/javascript" src="Camera.js"></script>
