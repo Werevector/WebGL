@@ -144,6 +144,8 @@ var main = (function() {
     var shininessLoc        = gl.getUniformLocation(program, "shininess");
 
     cubeNode = new SceneNode(scene);
+    cubeNode.translate([5.0,0.0,0.0]);
+    cubeNode.scale([10.0,10.0,10.0]);
     cubeNode.addDrawable(
     {
       bufferInfo:
@@ -191,8 +193,8 @@ var main = (function() {
       textureUnit: 0
     });
 
-    marsNode = new SceneNode(cubeNode);
-    marsNode.translate([8.0,0.0,0.0]);
+    marsNode = new SceneNode(scene);
+    marsNode.translate([13.0,0.0,0.0]);
     marsNode.scale([0.9,0.9,0.9]);
     marsNode.addDrawable(
     {
@@ -316,7 +318,8 @@ var main = (function() {
 
     var drawableObjects = SceneNode.getDrawableNodes();
 
-    cubeNode.rotateSelf(1, [0,1,0]);
+    cubeNode.rotateSelf(0.1, [0,1,0]);
+    cubeNode.rotate(0.1, [0,1,0]);
     marsNode.rotate(1,[0,1,0]);
     marsNode.rotateSelf(1,[0,1,0]);
 
