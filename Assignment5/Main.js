@@ -12,7 +12,9 @@ var cubeData;
 var sphereData;
 
 var scene = new SceneNode(null);
-var orbitNode;
+var sunOrbitNode;
+var earthOrbitNode;
+
 var sunNode;
 var earthNode;
 var marsNode;
@@ -118,8 +120,16 @@ var main = (function() {
 
     var drawableObjects = SceneNode.getDrawableNodes();
 
+    var simSpeed = 1;
+    var secondsPerYear = (60*60*24*365);
+    var minutesPerYear = secondsPerYear/60;
+    var hoursPerYear   = minutesPerYear/60;
+
     scene.updateMatrices();
-    earthNode.rotate([0,1,0]);
+    earthNode.rotate([0,1*secondsPerYear*tDelta,0]);
+    earthOrbitNode.rotate([0,hoursPerYear*tDelta,0]);
+    sunOrbitNode.rotate([0,1*secondsPerYear*tDelta,0]);
+
 
     viewMat = camera.getCameraView(tDelta);
     gl.uniformMatrix4fv( viewMatLoc,  false, flatten(viewMat));
@@ -174,12 +184,14 @@ var main = (function() {
 
     sunNode = new SceneNode(scene);
     sunNode.scale([100,100,100]);
+    sunOrbitNode = new SceneNode(sunNode);
 
-    earthNode = new SceneNode(sunNode);
+    earthNode = new SceneNode(sunOrbitNode);
     earthNode.translate([5.0,0.0,0.0]);
     earthNode.scale([0.05,0.05,0.05]);
+    earthOrbitNode = new SceneNode(earthNode);
 
-    moonNode = new SceneNode(earthNode);
+    moonNode = new SceneNode(earthOrbitNode);
     moonNode.translate([10.0,0.0,0.0]);
     moonNode.scale([0.3,0.3,0.3]);
 
