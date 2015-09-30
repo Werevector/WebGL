@@ -6,7 +6,7 @@ var keyboardStateX = new THREEx.KeyboardState();
 var time = 0;
 var tDelta;
 var camera;
-var cameraSpeed = 30;
+var cameraSpeed = 300;
 var program;
 var cubeData;
 var sphereData;
@@ -166,16 +166,22 @@ var main = (function() {
     gl.clearColor(0.3, 0.3, 0.3, 1.0);
 
     camera = new Camera();
-    camera.position[2] = -10;
+    camera.position[2] = -300;
     camera.position[0] = 5;
 
     cubeData = new generateCube();
     sphereData = generateSphere(128,128);
 
     sunNode = new SceneNode(scene);
+    sunNode.scale([100,100,100]);
+
     earthNode = new SceneNode(sunNode);
     earthNode.translate([5.0,0.0,0.0]);
-    earthNode.scale([0.5,0.5,0.5]);
+    earthNode.scale([0.05,0.05,0.05]);
+
+    moonNode = new SceneNode(earthNode);
+    moonNode.translate([10.0,0.0,0.0]);
+    moonNode.scale([0.3,0.3,0.3]);
 
 
     initBuffers();
@@ -261,6 +267,34 @@ var main = (function() {
         }
       }
     });
+
+    moonNode.addDrawable({
+    	bufferInfo: sphereBufferInfo,
+      programInfo: programInfo,
+      // Will be uploaded as uniforms
+      uniformInfo: {
+        color: vec4(0, 1, 1, 1),
+        texture: 2,
+
+        lm_Vars: new function()
+        {
+          this.lightPosition =  vec4(0.0, 0.0, 0.0, 0.0 );
+          this.lightAmbient =   vec4(0.2, 0.2, 0.2, 1.0 );
+          this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.lightSpecular =  vec4( 1.0, 1.0, 1.0, 1.0 );
+
+          this.materialAmbient =    vec4( 0.5, 0.5, 0.5, 1.0 );
+          this.materialDiffuse =    vec4( 0.7, 0.7, 0.7, 1.0);
+          this.materialSpecular =   vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.materialShininess =  20;
+
+          this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
+          this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
+          this.specularProduct =  mult(this.lightSpecular, this.materialSpecular);
+        }
+      }
+    });
+
 
 
     //-------------------------------------------------------------------------
