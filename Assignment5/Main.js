@@ -121,15 +121,13 @@ var main = (function() {
     var drawableObjects = SceneNode.getDrawableNodes();
 
     var simSpeed = 1;
-    var secondsPerYear = (60*60*24*365);
-    var minutesPerYear = secondsPerYear/60;
-    var hoursPerYear   = minutesPerYear/60;
 
+
+    earthNode.rotate([0,simSpeed*1*tDelta,0]);
+    earthOrbitNode.rotate([0,simSpeed*100*tDelta,0]);
+    sunOrbitNode.rotate([0,simSpeed*1*tDelta,0]);
+    marsNode.rotate([0,simSpeed*1*tDelta,0]);
     scene.updateMatrices();
-    earthNode.rotate([0,1*secondsPerYear*tDelta,0]);
-    earthOrbitNode.rotate([0,hoursPerYear*tDelta,0]);
-    sunOrbitNode.rotate([0,1*secondsPerYear*tDelta,0]);
-
 
     viewMat = camera.getCameraView(tDelta);
     gl.uniformMatrix4fv( viewMatLoc,  false, flatten(viewMat));
@@ -195,6 +193,9 @@ var main = (function() {
     moonNode.translate([10.0,0.0,0.0]);
     moonNode.scale([0.3,0.3,0.3]);
 
+    marsNode = new SceneNode(sunOrbitNode);
+    marsNode.translate([10.0,0.0,0.0]);
+    marsNode.scale([0.2,0.2,0.2]);
 
     initBuffers();
 
@@ -237,7 +238,7 @@ var main = (function() {
         lm_Vars: new function()
         {
           this.lightPosition =  vec4(0.0, 0.0, 0.0, 0.0 );
-          this.lightAmbient =   vec4(0.8, 0.8, 0.8, 0.8 );
+          this.lightAmbient =   vec4(1.0, 1.0, 1.0, 1.0 );
           this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
           this.lightSpecular =  vec4( 1.0, 1.0, 1.0, 1.0 );
 
@@ -287,6 +288,33 @@ var main = (function() {
       uniformInfo: {
         color: vec4(0, 1, 1, 1),
         texture: 2,
+
+        lm_Vars: new function()
+        {
+          this.lightPosition =  vec4(0.0, 0.0, 0.0, 0.0 );
+          this.lightAmbient =   vec4(0.2, 0.2, 0.2, 1.0 );
+          this.lightDiffuse =   vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.lightSpecular =  vec4( 1.0, 1.0, 1.0, 1.0 );
+
+          this.materialAmbient =    vec4( 0.5, 0.5, 0.5, 1.0 );
+          this.materialDiffuse =    vec4( 0.7, 0.7, 0.7, 1.0);
+          this.materialSpecular =   vec4( 1.0, 1.0, 1.0, 1.0 );
+          this.materialShininess =  20;
+
+          this.ambientProduct =   mult(this.lightAmbient, this.materialAmbient);
+          this.diffuseProduct =   mult(this.lightDiffuse, this.materialDiffuse);
+          this.specularProduct =  mult(this.lightSpecular, this.materialSpecular);
+        }
+      }
+    });
+
+    marsNode.addDrawable({
+    	bufferInfo: sphereBufferInfo,
+      programInfo: programInfo,
+      // Will be uploaded as uniforms
+      uniformInfo: {
+        color: vec4(0, 1, 1, 1),
+        texture: 1,
 
         lm_Vars: new function()
         {
